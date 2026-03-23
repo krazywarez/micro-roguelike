@@ -4,8 +4,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Micro Roguelike</title>
 
-<h1>Micro Roguelike</h1>
-<p>Choose a path. Learn the dungeon. Die often.</p>
+<style>
+section{display:none;min-height:100vh}
+#start:target,
+#gate:target,
+#bones:target,
+#beast:target,
+#hall:target,
+#pit:target,
+#idol:target,
+#crack:target,
+#vault:target,
+#death:target,
+#win:target{display:block}
+body:not(:target) #start{display:block}
+</style>
+
+<section id="start">
+  <h1>Micro Roguelike</h1>
+  <p>Choose a path. Learn the dungeon. Die often.</p>
+  <p><a href="#gate">Start</a></p>
+</section>
 
 <section id="gate">
   <h2>Gate</h2>
@@ -29,8 +48,7 @@
 <section id="beast">
   <h2>Beast</h2>
   <p>A sleeping beast opens one eye.</p>
-  <p><strong>Eaten.</strong></p>
-  <p><a href="#gate">Again</a></p>
+  <p><a href="#death">Continue</a></p>
 </section>
 
 <section id="hall">
@@ -47,7 +65,7 @@
   <h2>Pit</h2>
   <p>A black pit cuts the room in two. Too wide. Dark below.</p>
   <p>
-    <a href="#fell">Jump</a><br>
+    <a href="#death">Jump</a><br>
     <a href="#vault">Edge along wall</a>
   </p>
 </section>
@@ -56,7 +74,7 @@
   <h2>Idol</h2>
   <p>A gold idol watches. Coins glitter at its feet. Its head is bowed.</p>
   <p>
-    <a href="#cursed">Take gold</a><br>
+    <a href="#death">Take gold</a><br>
     <a href="#crack">Bow</a><br>
     <a href="#hall">Back</a>
   </p>
@@ -75,27 +93,15 @@
   <h2>Vault</h2>
   <p>A crown on stone. A small key beside it.</p>
   <p>
-    <a href="#wrongking">Take crown</a><br>
+    <a href="#death">Take crown</a><br>
     <a href="#win">Take key</a><br>
     <a href="#gate">Leave</a>
   </p>
 </section>
 
-<section id="fell">
+<section id="death">
   <h2>Death</h2>
-  <p><strong>Fell.</strong></p>
-  <p><a href="#gate">Again</a></p>
-</section>
-
-<section id="cursed">
-  <h2>Death</h2>
-  <p><strong>Cursed.</strong></p>
-  <p><a href="#gate">Again</a></p>
-</section>
-
-<section id="wrongking">
-  <h2>Death</h2>
-  <p><strong>Wrong king.</strong></p>
+  <p>You died.</p>
   <p><a href="#gate">Again</a></p>
 </section>
 
@@ -105,4 +111,5 @@
   <p>The outer gate opens. Dawn.</p>
   <p><a href="#gate">Again</a></p>
 </section>
+
 </html>
