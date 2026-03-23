@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Micro Roguelike</title>
+
+<h1>Micro Roguelike</h1>
+<p>Choose a path. Learn the dungeon. Die often.</p>
+
+<section id="gate">
+  <h2>Gate</h2>
+  <p>You stand at a ruined gate.</p>
+  <p>
+    <a href="#bones">Left</a><br>
+    <a href="#beast">Right</a><br>
+    <a href="#hall">Forward</a>
+  </p>
+</section>
+
+<section id="bones">
+  <h2>Bones</h2>
+  <p>Bones on the floor. A torch still burns.</p>
+  <p>
+    <a href="#hall">Take torch</a><br>
+    <a href="#pit">Move on</a>
+  </p>
+</section>
+
+<section id="beast">
+  <h2>Beast</h2>
+  <p>A sleeping beast opens one eye.</p>
+  <p><strong>Eaten.</strong></p>
+  <p><a href="#gate">Again</a></p>
+</section>
+
+<section id="hall">
+  <h2>Hall</h2>
+  <p>A stone hall. Stairs descend. A bronze door waits. A crack splits the wall.</p>
+  <p>
+    <a href="#pit">Stairs</a><br>
+    <a href="#idol">Door</a><br>
+    <a href="#crack">Crack</a>
+  </p>
+</section>
+
+<section id="pit">
+  <h2>Pit</h2>
+  <p>A black pit cuts the room in two.</p>
+  <p>
+    <a href="#fell">Jump</a><br>
+    <a href="#vault">Edge along wall</a>
+  </p>
+</section>
+
+<section id="idol">
+  <h2>Idol</h2>
+  <p>A gold idol watches. Coins glitter at its feet.</p>
+  <p>
+    <a href="#cursed">Take gold</a><br>
+    <a href="#crack">Bow</a><br>
+    <a href="#hall">Back</a>
+  </p>
+</section>
+
+<section id="crack">
+  <h2>Crack</h2>
+  <p>Barely wide enough.</p>
+  <p>
+    <a href="#vault">Squeeze through</a><br>
+    <a href="#hall">Return</a>
+  </p>
+</section>
+
+<section id="vault">
+  <h2>Vault</h2>
+  <p>A crown on stone. A small key beside it.</p>
+  <p>
+    <a href="#wrongking">Take crown</a><br>
+    <a href="#win">Take key</a><br>
+    <a href="#gate">Leave</a>
+  </p>
+</section>
+
+<section id="fell">
+  <h2>Death</h2>
+  <p><strong>Fell.</strong></p>
+  <p><a href="#gate">Again</a></p>
+</section>
+
+<section id="cursed">
+  <h2>Death</h2>
+  <p><strong>Cursed.</strong></p>
+  <p><a href="#gate">Again</a></p>
+</section>
+
+<section id="wrongking">
+  <h2>Death</h2>
+  <p><strong>Wrong king.</strong></p>
+  <p><a href="#gate">Again</a></p>
+</section>
+
+<section id="win">
+  <h2>Win</h2>
+  <p>You take the key.</p>
+  <p>The outer gate opens. Dawn.</p>
+  <p><a href="#gate">Again</a></p>
+</section>
+</html>
