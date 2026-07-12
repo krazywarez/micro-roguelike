@@ -944,7 +944,7 @@ const ESCAPES6=[[
 "############"]]
 const BEASTS6=[[10,8],[10,7],[9,7],[10,6]]
 const LEVEL_ORDER=[1,2,3,4,5,6]
-const LEVEL_ARCS={1:"foundation",2:"pressure",3:"ward",4:"hunt",5:"hollow",6:"finale"}
+const LEVEL_ARCS={1:"foundation",2:"pressure",3:"ward",4:"hunt",5:"hollow",6:"finale",7:"afterglow"}
 const MODES={
  standard:{label:"standard",desc:"full campaign"},
  iron:{label:"iron",desc:"early beast"},
@@ -967,7 +967,8 @@ const FLOOR_TEXT={
  3:["Wards answer, but never for free.","Blessing and burden share the same stone."],
  4:["The hunt floor wants you heard.","Noise becomes destiny down here."],
  5:["The hollow floor strips runs to their bones.","Only the sharpest choices still matter."],
- 6:["The last gate weighs what you became.","Every surviving system cashes in here."]
+ 6:["The last gate weighs what you became.","Every surviving system cashes in here."],
+ 7:["Dawn should have ended this. The ruin has other plans.","Nothing left down here owes you mercy."]
 }
 const FLOOR_THEMES={
  1:{name:"foundation",tag:"stale rite",accent:"verdigris",fog:"soft lantern fog"},
@@ -975,7 +976,8 @@ const FLOOR_THEMES={
  3:{name:"ward",tag:"cold liturgy",accent:"aqua ward",fog:"glass mist"},
  4:{name:"hunt",tag:"rose alarm",accent:"pink hunt",fog:"thin red haze"},
  5:{name:"hollow",tag:"ash hush",accent:"bone gray",fog:"dry blackout"},
- 6:{name:"finale",tag:"crown weather",accent:"gold ruin",fog:"judging dark"}
+ 6:{name:"finale",tag:"crown weather",accent:"gold ruin",fog:"judging dark"},
+ 7:{name:"afterglow",tag:"borrowed dawn",accent:"ash gold",fog:"embered haze"}
 }
 const ENEMY_TEXT={
   beast:["A one-eyed pursuer that reads space better than fear.","It wants a lane, not a duel."],
@@ -1037,7 +1039,8 @@ const RELIC_SPOTS={
 3:[["i",2,8],["c",2,1],["v",8,8],["h",8,8]],
 4:[["h",8,8],["i",8,8],["p",2,8],["v",8,8]],
 5:[["h",8,8],["i",8,8],["c",2,1],["v",2,8],["p",8,8]],
-6:[["e",8,8],["e",2,8],["e",8,2]]
+6:[["e",8,8],["e",2,8],["e",8,2]],
+7:[["h",8,8],["i",8,8],["c",2,1],["v",2,8],["p",8,8]]
 }
 const EFFIGY_SPOTS={
 1:[],
@@ -1045,7 +1048,8 @@ const EFFIGY_SPOTS={
 3:[["v",9,8]],
 4:[["v",9,8]],
 5:[["v",9,8]],
-6:[]
+6:[],
+7:[["v",9,8]]
 }
 const BRAZIER_SPOTS={
 1:[["h",8,8],["p",2,8]],
@@ -1053,7 +1057,8 @@ const BRAZIER_SPOTS={
 3:[["h",8,8],["i",8,8],["p",2,8],["v",2,8]],
 4:[["h",8,8],["i",8,8],["p",2,8],["v",2,8]],
 5:[["h",8,8],["i",8,8],["p",2,8],["v",2,8],["c",8,8]],
-6:[["e",8,2],["e",2,8],["e",8,8]]
+6:[["e",8,2],["e",2,8],["e",8,8]],
+7:[["h",8,8],["i",8,8],["p",2,8],["v",2,8],["c",8,8]]
 }
 const SHRINE_SPOTS={
 1:[["i",2,8]],
@@ -1061,7 +1066,8 @@ const SHRINE_SPOTS={
 3:[["h",8,4],["i",8,8],["c",8,8]],
 4:[["h",8,4],["i",8,8],["c",8,8],["p",8,4]],
 5:[["h",8,4],["i",8,8],["c",8,8],["v",8,8],["p",8,4]],
-6:[["e",8,4],["e",3,3],["e",8,8]]
+6:[["e",8,4],["e",3,3],["e",8,8]],
+7:[["h",8,4],["i",8,8],["c",8,8],["v",8,8],["p",8,4]]
 }
 const CURSE_SPOTS={
 1:[["h",8,8],["p",8,2],["c",8,8]],
@@ -1069,7 +1075,8 @@ const CURSE_SPOTS={
 3:[["h",7,4],["i",8,8],["c",7,1],["p",8,8],["v",8,4]],
 4:[["h",7,4],["i",8,8],["c",7,1],["p",8,8],["v",8,4]],
 5:[["h",7,4],["i",8,8],["c",7,1],["p",8,8],["v",8,4],["b",8,8]],
-6:[["e",8,8],["e",2,2],["e",8,2],["e",3,8]]
+6:[["e",8,8],["e",2,2],["e",8,2],["e",3,8]],
+7:[["h",7,4],["i",8,8],["c",7,1],["p",8,8],["v",8,4],["b",8,8]]
 }
 const SHADE_SPOTS={
 1:[["h",9,4],["p",8,8]],
@@ -1077,7 +1084,8 @@ const SHADE_SPOTS={
 3:[["h",9,4],["i",8,8],["c",8,8],["p",8,4]],
 4:[["h",9,4],["i",8,8],["c",8,8],["p",8,4],["v",8,8]],
 5:[["h",9,4],["i",8,8],["c",8,8],["p",8,4],["v",8,8],["b",8,8]],
-6:[["e",8,8],["e",2,8],["e",8,2],["e",3,8]]
+6:[["e",8,8],["e",2,8],["e",8,2],["e",3,8]],
+7:[["h",9,4],["i",8,8],["c",8,8],["p",8,4],["v",8,8],["b",8,8]]
 }
 const BLOCK_SPOTS={
 1:[],
@@ -1085,7 +1093,8 @@ const BLOCK_SPOTS={
 3:[["h",7,8],["p",2,8],["c",8,2],["v",2,4]],
 4:[["h",7,8],["p",2,8],["c",8,2],["v",2,4],["b",8,8]],
 5:[["h",7,8],["p",2,8],["c",8,2],["v",2,4],["b",8,8],["i",8,4]],
-6:[["e",2,4],["e",7,7],["e",2,7]]
+6:[["e",2,4],["e",7,7],["e",2,7]],
+7:[["h",7,8],["p",2,8],["c",8,2],["v",2,4],["b",8,8],["i",8,4]]
 }
 const WATCHER_SPOTS={
 1:[],
@@ -1093,7 +1102,8 @@ const WATCHER_SPOTS={
 3:[["h",8,8],["c",2,8],["v",8,8]],
 4:[["h",8,8],["c",2,8],["p",8,8],["v",8,8]],
 5:[["h",8,8],["c",2,8],["p",8,8],["v",8,8],["i",8,8]],
-6:[["e",8,2],["e",2,8]]
+6:[["e",8,2],["e",2,8]],
+7:[["h",8,8],["c",2,8],["p",8,8],["v",8,8],["i",8,8]]
 }
 const LEECH_SPOTS={
 1:[],
@@ -1101,7 +1111,8 @@ const LEECH_SPOTS={
 3:[["p",8,8],["c",8,8]],
 4:[["p",8,8],["c",8,8],["v",8,8]],
 5:[["p",8,8],["c",8,8],["v",8,8],["h",8,4]],
-6:[["e",8,8],["e",3,3]]
+6:[["e",8,8],["e",3,3]],
+7:[["p",8,8],["c",8,8],["v",8,8],["h",8,4]]
 }
 const LEVELS={
 1:{pits:PITS,idols:IDOLS,cracks:CRACKS,halls:HALLS,escapes:ESCAPES,beasts:BEASTS,dark:"pecv",tone:"The air is stale with old rites."},
@@ -1109,7 +1120,8 @@ const LEVELS={
 3:{pits:PITS3,idols:IDOLS3,cracks:CRACKS3,halls:HALLS3,escapes:ESCAPES3,beasts:BEASTS3,dark:"behipcv",tone:"The shrines still answer, but every blessing exacts a price."},
 4:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES4,beasts:BEASTS4,dark:"behipcv",tone:"The hunt floor listens for every sound you make."},
 5:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES5,beasts:BEASTS5,dark:"behipcv",tone:"The hollow floor strips away whatever was merely enough."},
-6:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES6,beasts:BEASTS6,dark:"behipcv",tone:"The final gate wakes. Everything left in you will be tested."}
+6:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES6,beasts:BEASTS6,dark:"behipcv",tone:"The final gate wakes. Everything left in you will be tested."},
+7:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES6,beasts:BEASTS6,dark:"behipcv",tone:"You already won. The ruin didn't agree to let you leave."}
 }
 const BASE={
 g:{m:[
@@ -1237,4 +1249,4 @@ v:{m:[
 "############"],ex:{">":"e"}},
 d:BASE.d
 }
-const BASES={1:BASE,2:BASE2,3:BASE3,4:BASE3,5:BASE3,6:BASE3}
+const BASES={1:BASE,2:BASE2,3:BASE3,4:BASE3,5:BASE3,6:BASE3,7:BASE3}

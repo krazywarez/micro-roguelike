@@ -47,6 +47,7 @@ linear-gradient(180deg,transparent,rgba(0,0,0,.12));mix-blend-mode:screen;opacit
 #s[data-floor="4"]{--bg0:#170910;--bg1:#040203;--panel:#120810e1;--panelEdge:#5f1d39;--gridEdge:#4c1b31;--accent:#ff86b5;--accent2:#ffd39a;--fog:#ffd8e7;--mist:#ff6ca41a;--glow:#ff75b460;--gridGlow:#ff75b426;--floor:#22101a;--memory:#876071;--wall:#8c6a7a;--pit:#d75b64;--exit:#ffd392;--torch:#ffb262;--shrine:#f1a8ff;--relic:#ffe28b;--hazard:#ff7b7b;--shade:#b7b7ff;--watcher:#ffd2a6;--leech:#95f1d7;--beast:#ff5da8;--player:#fff7fb}
 #s[data-floor="5"]{--bg0:#0d0d10;--bg1:#010101;--panel:#0a0b0de1;--panelEdge:#3f4247;--gridEdge:#34373d;--accent:#c8d0da;--accent2:#f1d8a2;--fog:#e6ebf0;--mist:#ffffff10;--glow:#cbd6e245;--gridGlow:#cbd6e216;--floor:#17191d;--memory:#70767d;--wall:#838991;--pit:#c2645e;--exit:#f2ddb0;--torch:#e8b36f;--shrine:#c0ebff;--relic:#f5e2a7;--hazard:#ff9387;--shade:#aab7d9;--watcher:#ebd3a1;--leech:#a2dccf;--beast:#ff8ab4;--player:#fcfdff}
 #s[data-floor="6"]{--bg0:#140f08;--bg1:#030201;--panel:#110d08e2;--panelEdge:#6b5824;--gridEdge:#53461f;--accent:#f0d06d;--accent2:#fff0b3;--fog:#fff0c4;--mist:#f0c24a18;--glow:#f1cd6760;--gridGlow:#f1cd6726;--floor:#221d10;--memory:#8e7d52;--wall:#93886b;--pit:#d06d56;--exit:#fff0a6;--torch:#ffc768;--shrine:#d0f5c2;--relic:#fff1a1;--hazard:#ff8b67;--shade:#c7d6ff;--watcher:#ffe0a0;--leech:#beefc7;--beast:#ff7d9b;--player:#fffdf3}
+#s[data-floor="7"]{--bg0:#170c08;--bg1:#040201;--panel:#130a07e2;--panelEdge:#7a3f22;--gridEdge:#5e321c;--accent:#ff9a5c;--accent2:#ffd9a0;--fog:#ffe0b8;--mist:#ff8a4a1c;--glow:#ff9a5c60;--gridGlow:#ff9a5c26;--floor:#24140d;--memory:#93705a;--wall:#8f6f5c;--pit:#c9503f;--exit:#ffcf8f;--torch:#ffab5e;--shrine:#f2cfae;--relic:#ffe3a1;--hazard:#ff7a5c;--shade:#c9b6ff;--watcher:#ffcf8a;--leech:#c9e0a8;--beast:#ff6a7d;--player:#fff6ef}
 #s[data-state="title"]{--accent:#d9e6d6;--panelEdge:#445348;--gridEdge:#445348;--mist:#7fb48612}
 #s[data-state="dead"]{--accent:#ff8b79;--panelEdge:#6b2f27;--gridEdge:#612b24;--mist:#ff715812}
 #s[data-state="win"]{--accent:#f3dd8f;--panelEdge:#7a6930;--gridEdge:#6e5f2c;--mist:#f3dd8f18}
@@ -266,6 +267,22 @@ function startFinale(){
   S.hint=""
   S.fx="shift"
   setMsg(`${fName}. Title: ${buildTitle()}. Carry the crown through the last warded gate.`)
+}
+
+function startPostgame(){
+  const keep={torch:S.flags.torch,ash:S.flags.ash,mask:S.flags.mask,gold:S.flags.gold,ward:S.flags.ward,relic:S.flags.relic,relicPlus:S.flags.relicPlus}
+  S.level=7
+  S.currentLevel=7
+  build(seed)
+  S.gameState="play"
+  S.r="g";S.x=P.g[0];S.y=P.g[1];S.turn=0;S.crownTurn=-1;S.chase=0;S.dread=0
+  S.flags={idol:0,gold:keep.gold,torch:Math.max(keep.torch,4),ash:keep.ash,crown:0,key:0,mask:keep.mask,ward:keep.ward,relic:keep.relic,relicPlus:keep.relicPlus}
+  S.beast={x:B0[0],y:B0[1]}
+  S.drop=null
+  S.path={pit:0,crack:0,drops:S.path.drops,shrines:S.path.shrines,relics:S.path.relics,shades:S.path.shades,watchers:S.path.watchers,leeches:S.path.leeches,camps:S.path.camps,levels:7,finale:S.path.finale}
+  S.hint=""
+  S.fx="shift"
+  setMsg(`Enter floor 7. Title: ${buildTitle()}. ${floorLine(7)}`)
 }
 
 function applyCampChoice(choice){
@@ -802,6 +819,7 @@ function jumpLevel(level=2){
 
 function key(e){
   if(e.key=="m"){muted=!muted;render();return}
+  if(S.gameState=="win"&&(e.key=="p"||e.key=="7")){startPostgame();render();return}
   if(S.gameState=="title"){
     if("12345".includes(e.key)){startRun(MODE_IDS[+e.key-1],1);render();return}
     if(e.key=="r"){startRun("standard",1);render();return}
@@ -930,7 +948,7 @@ function render(){
     `mods  : ${modSummary()}`
   ],done?"press restart to descend again":"the gate opens and the run resolves")
   I.textContent=`summary\n${endStats()}${DBG.show?`\n\ndebug\n${variantSummary()}${DBG.out?`\ncheck: ${DBG.out}`:""}`:""}`
-  L.textContent=`${S.endLead}\n${done?"The ruin keeps the rest.":"The run closes cleanly at the gate."}`
+  L.textContent=`${S.endLead}\n${done?"The ruin keeps the rest.":"The run closes cleanly at the gate."}${!done?"\npress p to descend further":""}`
   X.hidden=false
 }
 render()
