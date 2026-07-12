@@ -62,7 +62,7 @@ linear-gradient(180deg,transparent,rgba(0,0,0,.12));mix-blend-mode:screen;opacit
 <script src=data.js></script>
 <script>
 const SEl=document.getElementById("s"),U=document.getElementById("u"),G=document.getElementById("g"),I=document.getElementById("i"),L=document.getElementById("l"),X=document.getElementById("r"),D=document.getElementById("d")
-let seed=0,B0=[10,8],R,S,V={hall:0,pit:0,idol:0,crack:0,escape:0,beast:0},DBG={show:0,out:""},O={relics:[],curses:[],shades:[],blocks:[],braziers:[],shrines:[],watchers:[],leeches:[]}
+let seed=0,B0=[10,8],R,S,V={hall:0,pit:0,idol:0,crack:0,escape:0,beast:0},DBG={show:0,out:""},O={relics:[],curses:[],shades:[],blocks:[],braziers:[],shrines:[],watchers:[],leeches:[],effigies:[]}
 
 function rng(n){
   return function(){
@@ -124,7 +124,8 @@ function build(seed0){
     shades:pickSpots(r,SHADE_SPOTS[level]||[],Math.min(level+1,5)).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
     watchers:pickSpots(r,WATCHER_SPOTS[level]||[],Math.max(0,level-1)).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
     leeches:pickSpots(r,LEECH_SPOTS[level]||[],Math.max(0,level-2)).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
-    blocks:pickSpots(r,BLOCK_SPOTS[level]||[],99).map(v=>({r:v[0],x:v[1],y:v[2],on:1}))}
+    blocks:pickSpots(r,BLOCK_SPOTS[level]||[],99).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
+    effigies:pickSpots(r,EFFIGY_SPOTS[level]||[],Math.max(0,level-1)).map(v=>({r:v[0],x:v[1],y:v[2],on:1}))}
   R={
     g:B.g,b:B.b,v:B.v,d:B.d,
     h:{m:L.halls[V.hall],ex:{a:"p",b:"i",c:"c",d:"d",">":"g"}},
@@ -275,6 +276,7 @@ function tile(x,y,r=S.r){
   if(overAt(r,x,y,"braziers"))return "F"
   if(overAt(r,x,y,"shrines"))return "S"
   if(overAt(r,x,y,"relics"))return "r"
+  if(overAt(r,x,y,"effigies"))return "r"
   if(overAt(r,x,y,"shades"))return "n"
   if(overAt(r,x,y,"watchers"))return "q"
   if(overAt(r,x,y,"leeches"))return "l"
@@ -645,6 +647,8 @@ function touch(t,x,y){
     setMsg(S.level>=3?"Raise a ward. Flame will feed it.":"Raise a ward. It will hold for a while.")
   }
   if(t=="r"){
+    const eff=overAt(S.r,x,y,"effigies")
+    if(eff){eff.on=0;return die("The second relic was never real. Poison closes your throat.")}
     const o=overAt(S.r,x,y,"relics")
     if(o){
       S.flags.relic=o.id;S.flags.relicPlus=0;S.path.relics++;o.on=0;S.fx="relic"

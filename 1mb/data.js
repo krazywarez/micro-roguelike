@@ -981,7 +981,8 @@ const ENEMY_TEXT={
   beast:["A one-eyed pursuer that reads space better than fear.","It wants a lane, not a duel."],
   shade:["A cold pass-through that feeds dread and tells on you.","It does not block the path; it poisons it."],
   watcher:["A fixed witness that turns position into pursuit.","Quiet fails where it stands."],
-  leech:["A grave thing that eats ward and heat.","It survives by thinning what protects you."]
+  leech:["A grave thing that eats ward and heat.","It survives by thinning what protects you."],
+  effigy:["A second relic, and a third. Only one is true.","The others were never meant to be found."]
 }
 const SHRINE_TEXT=[
   "The shrine lends shape to your nerve.",
@@ -1028,6 +1029,14 @@ const RELIC_SPOTS={
 4:[["h",8,8],["i",8,8],["p",2,8],["v",8,8]],
 5:[["h",8,8],["i",8,8],["c",2,1],["v",2,8],["p",8,8]],
 6:[["e",8,8],["e",2,8],["e",8,2]]
+}
+const EFFIGY_SPOTS={
+1:[],
+2:[["v",9,8]],
+3:[["v",9,8]],
+4:[["v",9,8]],
+5:[["v",9,8]],
+6:[]
 }
 const BRAZIER_SPOTS={
 1:[["h",8,8],["p",2,8]],
