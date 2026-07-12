@@ -1,0 +1,2098 @@
+<!doctype html><meta charset=utf-8><title>1MB Roguelike v1</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;min-width:100vw;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#020403;color:#dbe8d7;font:14px/1.3 monospace}
+#s{--bg0:#07100b;--bg1:#010201;--panel:#07110cdd;--panelEdge:#29432d;--gridEdge:#213d28;--accent:#99d9a4;--accent2:#f0c86a;--fog:#d8f1db;--mist:#7fb48622;--glow:#9be8a055;--gridGlow:#9be8a022;--text:#deeddc;--muted:#8aa38f;--floor:#112015;--memory:#5f7b66;--hidden:#081009;--wall:#647569;--pit:#a4473e;--exit:#f7d37f;--torch:#ffbd63;--shrine:#9df3e8;--relic:#ffe27b;--hazard:#ff8777;--shade:#9bc1ff;--watcher:#ffd294;--leech:#8ef3da;--beast:#ff77d2;--player:#f8fff6;--shadow:rgba(0,0,0,.8);--wardGlow:#88fff330;width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:18px 14px 24px;overflow-x:hidden;box-sizing:border-box;background:
+radial-gradient(circle at 50% 16%,var(--mist),transparent 30%),
+radial-gradient(circle at 50% 45%,var(--gridGlow),transparent 46%),
+linear-gradient(180deg,var(--bg0),var(--bg1) 72%);color:var(--text);transition:background .2s,padding .15s,color .15s}
+#u,#i,#l,#g,#r{box-sizing:border-box}
+#u{min-height:42px;width:fit-content;max-width:min(92vw,72ch);padding:9px 14px;border:1px solid color-mix(in srgb,var(--panelEdge) 72%,#5b6a60);background:linear-gradient(180deg,#0b1510d8,#050805f0);box-shadow:0 0 0 1px #000 inset,0 0 18px #0006;text-align:center;white-space:pre-line;color:var(--text);letter-spacing:.04em}
+#u small{display:block;color:var(--muted);margin-top:3px;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+#p{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:16px;width:min(100%,860px);min-height:214px;max-width:100%;overflow:visible}
+#g{position:relative;display:grid;grid-template-columns:repeat(12,16px);gap:1px;padding:12px;border:1px solid var(--gridEdge);background:
+radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--bg0) 72%,#0d1510) 0,var(--shadow) 58%,#000 88%),
+linear-gradient(180deg,#060806,#010101);box-shadow:inset 0 0 0 1px #000,0 0 24px #0008,0 0 10px var(--gridGlow);transition:transform .12s,box-shadow .12s,opacity .12s,filter .15s;flex:0 0 auto;max-width:100%}
+#g:before{content:"";position:absolute;inset:0;pointer-events:none;background:
+radial-gradient(circle at 50% 50%,transparent 38%,var(--shadow) 76%),
+linear-gradient(180deg,transparent,rgba(0,0,0,.12));mix-blend-mode:screen;opacity:.72}
+#g[data-intro]:after{content:attr(data-intro);position:absolute;left:10px;right:10px;top:10px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--accent) 58%,#5b6a60);background:linear-gradient(180deg,#0b130edc,#050805f3);box-shadow:inset 0 0 0 1px #000,0 0 18px #0007;color:var(--fog);white-space:pre-line;line-height:1.35;letter-spacing:.04em;text-align:left;pointer-events:none;z-index:3}
+#g.splash{display:block;flex:0 1 auto;width:min(calc(35ch + 36px),100%);min-width:calc(35ch + 36px);max-width:100%;padding:16px 18px;white-space:pre;line-height:1.28;text-align:left;color:var(--text);overflow:hidden}
+#g.splash:before{opacity:.45}
+#i{flex:0 1 auto;width:min(calc(35ch + 26px),100%);min-width:calc(35ch + 26px);max-width:100%;min-height:230px;padding:11px 13px;border:1px solid color-mix(in srgb,var(--panelEdge) 74%,#5b6a60);background:linear-gradient(180deg,var(--panel),#050805f2);color:var(--text);line-height:1.42;white-space:pre-line;text-align:left;box-shadow:inset 0 0 0 1px #000,0 0 18px #0006;overflow-wrap:break-word}
+#l{min-height:38px;width:min(100%,860px);padding:9px 16px;border:1px solid color-mix(in srgb,var(--panelEdge) 72%,#5b6a60);background:linear-gradient(180deg,#0a110dcd,#050805ec);color:var(--muted);white-space:pre-line;text-align:center;box-shadow:inset 0 0 0 1px #000}
+#r{margin-top:8px;padding:8px 14px;border:1px solid color-mix(in srgb,var(--accent) 70%,#6e7c73);background:linear-gradient(180deg,#09110b,#030503);color:var(--accent);font:inherit;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 14px #0007}
+.t{position:relative;width:16px;height:16px;display:flex;align-items:center;justify-content:center;transition:transform .08s,color .12s,opacity .12s,filter .12s,text-shadow .12s,background .12s}
+.v{opacity:1;filter:saturate(1)}.m{opacity:.44;filter:saturate(.42) brightness(.78)}.u{opacity:0}
+.far{opacity:.58}.mid{opacity:.8}
+.p{color:var(--player);text-shadow:0 0 9px color-mix(in srgb,var(--player) 30%,var(--glow));font-weight:bold;filter:drop-shadow(0 0 4px #fff3)}.pm{animation:step .12s}.bm{animation:step .12s reverse}
+.w{color:var(--wall)}.o{color:var(--pit);text-shadow:0 0 6px #4d100c}.f{color:var(--floor)}
+.i,.C,.K{color:var(--exit);text-shadow:0 0 6px color-mix(in srgb,var(--exit) 50%,#000)}.g{color:var(--accent2);text-shadow:0 0 6px color-mix(in srgb,var(--accent2) 45%,#000)}.I{color:#ffe8a7;text-shadow:0 0 6px #8f7440}.M{color:#d6ddd6}.T,.F{color:var(--torch);text-shadow:0 0 8px color-mix(in srgb,var(--torch) 60%,#000);animation:flicker .9s infinite}.drop{color:#ffd79d}
+.B{color:var(--beast);text-shadow:0 0 8px color-mix(in srgb,var(--beast) 70%,#000);font-weight:bold}.B.alert{color:#ffa8e4}.B.enraged{color:#ff6767;text-shadow:0 0 8px #ff4d4d}
+.S{color:var(--shrine);text-shadow:0 0 8px color-mix(in srgb,var(--shrine) 65%,#000);animation:pulse 1.5s infinite;font-weight:bold}.S.stress{color:#c5fbff;animation:pulse .6s infinite}
+.r{color:var(--relic);text-shadow:0 0 7px color-mix(in srgb,var(--relic) 55%,#000);font-weight:bold}
+.x,.z{color:var(--hazard);text-shadow:0 0 7px color-mix(in srgb,var(--hazard) 40%,#000);font-weight:bold}.n{color:var(--shade);text-shadow:0 0 6px #22395f}.q{color:var(--watcher);text-shadow:0 0 6px #5a3d12;font-weight:bold}.l{color:var(--leech);text-shadow:0 0 6px #10453b}
+.n.alert,.q.alert,.l.alert{animation:pulse .65s infinite}
+.warded{box-shadow:inset 0 0 0 1px var(--wardGlow);background:radial-gradient(circle at 50% 50%,#ffffff08,transparent 72%)}
+.haz{filter:brightness(1.14)}
+.fog1{opacity:.9}.fog2{opacity:.72}.fog3{opacity:.55}
+#g.hit{transform:translateX(2px);box-shadow:inset 0 0 0 1px #000,0 0 24px #0008,0 0 14px color-mix(in srgb,var(--hazard) 70%,#000)}#g.win{box-shadow:inset 0 0 0 1px #000,0 0 24px #0008,0 0 14px var(--glow)}#g.shift{transform:scale(1.02)}#g.ward{animation:wardbreak .2s ease-out}#g.relic{animation:relicpulse .24s ease-out}
+#u.dead,#u.win,#u.camp{letter-spacing:.12em;text-transform:uppercase}
+#s[data-floor="1"]{--bg0:#0a130d;--bg1:#020302;--panel:#08100bdd;--panelEdge:#29442e;--gridEdge:#213929;--accent:#9fe2ab;--accent2:#f0cc76;--fog:#dbf5df;--mist:#88c6911c;--glow:#9be8a055;--gridGlow:#9be8a020;--floor:#132217;--memory:#667f6a;--wall:#6c786f;--pit:#ad584a;--exit:#f3d487;--torch:#ffbf67;--shrine:#9df1df;--relic:#ffe28f;--hazard:#ff8b77;--shade:#a7c8ff;--watcher:#ffd298;--leech:#8ef0db;--beast:#ff81d9;--player:#fbfff8}
+#s[data-floor="2"]{--bg0:#170d08;--bg1:#040202;--panel:#130b08e1;--panelEdge:#5c3520;--gridEdge:#4d2d1e;--accent:#ffb07a;--accent2:#ffd18f;--fog:#ffd9c0;--mist:#ff985415;--glow:#ff9d6260;--gridGlow:#ff9d6224;--floor:#24130d;--memory:#8a665b;--wall:#8f6d63;--pit:#dd6a55;--exit:#ffd48a;--torch:#ffaf59;--shrine:#ffd0a6;--relic:#ffe08e;--hazard:#ff7766;--shade:#d3c0ff;--watcher:#ffd0ad;--leech:#f1b68f;--beast:#ff7eb4;--player:#fff7f1}
+#s[data-floor="3"]{--bg0:#081416;--bg1:#020404;--panel:#071113e1;--panelEdge:#1c5459;--gridEdge:#1a474d;--accent:#8ce4eb;--accent2:#d8f09f;--fog:#d5fbff;--mist:#74f2ff18;--glow:#78ebf560;--gridGlow:#78ebf524;--floor:#0f2123;--memory:#628489;--wall:#6f8386;--pit:#b15a65;--exit:#dff2a3;--torch:#ffcf76;--shrine:#8ff8f1;--relic:#fff09c;--hazard:#ff8e86;--shade:#9fc8ff;--watcher:#f8eeae;--leech:#85f0dc;--beast:#ff9be4;--player:#f6ffff}
+#s[data-floor="4"]{--bg0:#170910;--bg1:#040203;--panel:#120810e1;--panelEdge:#5f1d39;--gridEdge:#4c1b31;--accent:#ff86b5;--accent2:#ffd39a;--fog:#ffd8e7;--mist:#ff6ca41a;--glow:#ff75b460;--gridGlow:#ff75b426;--floor:#22101a;--memory:#876071;--wall:#8c6a7a;--pit:#d75b64;--exit:#ffd392;--torch:#ffb262;--shrine:#f1a8ff;--relic:#ffe28b;--hazard:#ff7b7b;--shade:#b7b7ff;--watcher:#ffd2a6;--leech:#95f1d7;--beast:#ff5da8;--player:#fff7fb}
+#s[data-floor="5"]{--bg0:#0d0d10;--bg1:#010101;--panel:#0a0b0de1;--panelEdge:#3f4247;--gridEdge:#34373d;--accent:#c8d0da;--accent2:#f1d8a2;--fog:#e6ebf0;--mist:#ffffff10;--glow:#cbd6e245;--gridGlow:#cbd6e216;--floor:#17191d;--memory:#70767d;--wall:#838991;--pit:#c2645e;--exit:#f2ddb0;--torch:#e8b36f;--shrine:#c0ebff;--relic:#f5e2a7;--hazard:#ff9387;--shade:#aab7d9;--watcher:#ebd3a1;--leech:#a2dccf;--beast:#ff8ab4;--player:#fcfdff}
+#s[data-floor="6"]{--bg0:#140f08;--bg1:#030201;--panel:#110d08e2;--panelEdge:#6b5824;--gridEdge:#53461f;--accent:#f0d06d;--accent2:#fff0b3;--fog:#fff0c4;--mist:#f0c24a18;--glow:#f1cd6760;--gridGlow:#f1cd6726;--floor:#221d10;--memory:#8e7d52;--wall:#93886b;--pit:#d06d56;--exit:#fff0a6;--torch:#ffc768;--shrine:#d0f5c2;--relic:#fff1a1;--hazard:#ff8b67;--shade:#c7d6ff;--watcher:#ffe0a0;--leech:#beefc7;--beast:#ff7d9b;--player:#fffdf3}
+#s[data-state="title"]{--accent:#d9e6d6;--panelEdge:#445348;--gridEdge:#445348;--mist:#7fb48612}
+#s[data-state="dead"]{--accent:#ff8b79;--panelEdge:#6b2f27;--gridEdge:#612b24;--mist:#ff715812}
+#s[data-state="win"]{--accent:#f3dd8f;--panelEdge:#7a6930;--gridEdge:#6e5f2c;--mist:#f3dd8f18}
+#s[data-state="camp"]{--accent:#c8f2dd;--panelEdge:#376050;--gridEdge:#2f5648;--mist:#8ff0cc18}
+@media (max-width:780px){#s{justify-content:flex-start;padding:12px 10px 20px}#p{flex-direction:column;align-items:center;width:100%}#g,#i,#g.splash,#l,#u{width:min(92vw,420px);max-width:100%}#i,#g.splash{min-width:0}#g.splash{overflow:auto}}
+@keyframes flicker{0%,100%{opacity:1;transform:translateY(0)}25%{opacity:.75;transform:translateY(-.5px)}50%{opacity:.94}75%{opacity:.68;transform:translateY(.5px)}}
+@keyframes pulse{0%,100%{opacity:.84;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes step{0%{transform:scale(.82)}100%{transform:scale(1)}}
+@keyframes wardbreak{0%{filter:brightness(1.35)}100%{filter:brightness(1)}}
+@keyframes relicpulse{0%{transform:scale(1)}50%{transform:scale(1.035)}100%{transform:scale(1)}}
+</style>
+<div id=s><div id=u></div><div id=p><div id=g></div><div id=i></div></div><div id=l></div><button id=r hidden>restart</button></div>
+<script>
+const W=12,H=12,FUEL=16
+const P={g:[5,2],b:[2,2],e:[2,9],h:[2,9],p:[2,2],i:[2,2],c:[2,2],v:[2,2],d:[2,2]}
+const PITS=[[
+"############",
+"#OOOOOOOOOO#",
+"#O....F...O#",
+"#O...OO...O#",
+"#O........O#",
+"#O....>...O#",
+"#O........O#",
+"#O...OO...O#",
+"#O........O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O.......OO#",
+"#O.OOOOO..O#",
+"#O.......OO#",
+"#O..>.....O#",
+"#O....F...O#",
+"#O..OOOOO.O#",
+"#O........O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O........O#",
+"#O..OO....O#",
+"#O........O#",
+"#OF....>..O#",
+"#O....OO..O#",
+"#O........O#",
+"#O..OO....O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"]]
+const IDOLS=[[
+"############",
+"#..........#",
+"#...ggg....#",
+"#...gIg....#",
+"#...ggg....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#....>.....#",
+"############"],[
+"############",
+"#..........#",
+"#....gg....#",
+"#...gIg....#",
+"#....ggg...#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#....>.....#",
+"############"],[
+"############",
+"#..........#",
+"#...gg.....#",
+"#...gIgg...#",
+"#.....gg...#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#....>.....#",
+"############"]]
+const IDOLS2=[[
+"############",
+"#..........#",
+"#..ggg.....#",
+"#..gIgg....#",
+"#....gg....#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#...>......#",
+"############"],[
+"############",
+"#..........#",
+"#....ggg...#",
+"#...ggIg...#",
+"#....gg....#",
+"#..........#",
+"#..........#",
+"#....#.....#",
+"#..........#",
+"#..........#",
+"#.....>....#",
+"############"],[
+"############",
+"#..........#",
+"#...gg.....#",
+"#..ggIg....#",
+"#...gg.....#",
+"#..........#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#....>.....#",
+"############"]]
+const CRACKS=[[
+"############",
+"#..........#",
+"#.####.....#",
+"#....#.....#",
+"#..x.>.....#",
+"#....#.....#",
+"#....#.....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#.....####.#",
+"#.....#....#",
+"#.....#....#",
+"#...x.>....#",
+"#.....#....#",
+"#.....####.#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..######..#",
+"#.......#..#",
+"#...x...#..#",
+"#....>..#..#",
+"#.......#..#",
+"#..######..#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"]]
+const HALLS=[[
+"############",
+"#..........#",
+"#..a.......#",
+"#......b...#",
+"#..........#",
+"#....c.....#",
+"#......d...#",
+"#..........#",
+"#....F.....#",
+"#....>.....#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#......b...#",
+"#..........#",
+"#..a.......#",
+"#..........#",
+"#....c..d..#",
+"#..........#",
+"#..F.>.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..a....b..#",
+"#..........#",
+"#..........#",
+"#....c..F..#",
+"#..........#",
+"#......d...#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"############"]]
+const ESCAPES=[[
+"############",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..........#",
+"#...##.....#",
+"#......>...#",
+"#..........#",
+"#.....##...#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#....##....#",
+"#..........#",
+"#..........#",
+"#..>.......#",
+"#.......##.#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"]]
+const BEASTS=[[10,8],[9,7]]
+const PITS2=[[
+"############",
+"#OOOOOOOOOO#",
+"#O..FOOO..O#",
+"#O...OO...O#",
+"#O........O#",
+"#O...O>O..O#",
+"#O........O#",
+"#O...OO...O#",
+"#O..OOOO..O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O......OOO#",
+"#O.OOOOO..O#",
+"#O....O...O#",
+"#O..O>O...O#",
+"#O....F...O#",
+"#O..OOOOO.O#",
+"#O....O...O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O....O...O#",
+"#O..OOO...O#",
+"#O........O#",
+"#OF..O.>..O#",
+"#O....OOO.O#",
+"#O........O#",
+"#O..OOO...O#",
+"#O....O...O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O..F.....O#",
+"#O.OOOO...O#",
+"#O.....O..O#",
+"#O..>.OO..O#",
+"#O.....O..O#",
+"#O...OOOO.O#",
+"#O........O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"]]
+const CRACKS2=[[
+"############",
+"#.....x....#",
+"#.#####....#",
+"#....##....#",
+"#..x.>#....#",
+"#....##....#",
+"#....##....#",
+"#.....x....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....x.....#",
+"#.....####.#",
+"#....##....#",
+"#....##....#",
+"#...x.>....#",
+"#....##....#",
+"#.....####.#",
+"#....x.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....x.....#",
+"#..######..#",
+"#.... ..#..#",
+"#...x...#..#",
+"#..x.>..#..#",
+"#.......#..#",
+"#..######..#",
+"#....x.....#",
+"#..........#",
+"#..........#",
+"############"]].map(m=>m.map(r=>r.replace(/ /g,".")))
+const HALLS2=[[
+"############",
+"#..........#",
+"#..a...b...#",
+"#..........#",
+"#....F.....#",
+"#....c.....#",
+"#......d...#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#....b.....#",
+"#..a.......#",
+"#....F.....#",
+"#....c..d..#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..a....b..#",
+"#....F.....#",
+"#..........#",
+"#....c.....#",
+"#......d...#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"############"]]
+const ESCAPES2=[[
+"############",
+"#....##....#",
+"#..........#",
+"#..........#",
+"#...>......#",
+"#..........#",
+"#..##......#",
+"#..........#",
+"#......##..#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#...##.....#",
+"#..........#",
+"#..>.......#",
+"#..........#",
+"#.....##...#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..##......#",
+"#..........#",
+"#..>....##.#",
+"#..........#",
+"#......##..#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"]]
+const BEASTS2=[[9,8],[9,7],[10,7]]
+const PITS3=[[
+"############",
+"#OOOOOOOOOO#",
+"#O..SFOO..O#",
+"#O...OO...O#",
+"#O........O#",
+"#O...O>O..O#",
+"#O........O#",
+"#O...OO...O#",
+"#O..OOOO..O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O.....SOOO#",
+"#O.OOOOO..O#",
+"#O....O...O#",
+"#O..O>O...O#",
+"#O....F...O#",
+"#O..OOOOO.O#",
+"#O....O...O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O....O...O#",
+"#O..OOO...O#",
+"#O....S...O#",
+"#OF..O.>..O#",
+"#O....OOO.O#",
+"#O........O#",
+"#O..OOO...O#",
+"#O....O...O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O..S.O...O#",
+"#O..OOO...O#",
+"#O........O#",
+"#O...O.>..O#",
+"#O....OOO.O#",
+"#O....F...O#",
+"#O..OOO...O#",
+"#O....O...O#",
+"#OOOOOOOOOO#",
+"############"]]
+const IDOLS3=[[
+"############",
+"#..........#",
+"#..ggg.....#",
+"#..gISg....#",
+"#....gg....#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#...>......#",
+"############"],[
+"############",
+"#..........#",
+"#....ggg...#",
+"#...gSIg...#",
+"#....gg....#",
+"#..........#",
+"#..........#",
+"#....#.....#",
+"#..........#",
+"#..........#",
+"#.....>....#",
+"############"],[
+"############",
+"#..........#",
+"#...gg.....#",
+"#..gSIg....#",
+"#...gg.....#",
+"#..........#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#....>.....#",
+"############"]]
+const CRACKS3=[[
+"############",
+"#....Sx....#",
+"#.#####....#",
+"#....##....#",
+"#..x.>#....#",
+"#....##....#",
+"#....##....#",
+"#.....x....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....x.....#",
+"#...S.####.#",
+"#....##....#",
+"#....##....#",
+"#...x.>....#",
+"#....##....#",
+"#.....####.#",
+"#....x.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....x.....#",
+"#..######..#",
+"#....S..#..#",
+"#...x...#..#",
+"#..x.>..#..#",
+"#.......#..#",
+"#..######..#",
+"#....x.....#",
+"#..........#",
+"#..........#",
+"############"]]
+const HALLS3=[[
+"############",
+"#..........#",
+"#..a..S.b..#",
+"#..........#",
+"#....F.....#",
+"#....c.....#",
+"#......d...#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#....b..S..#",
+"#..a.......#",
+"#....F.....#",
+"#....c..d..#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..a....b..#",
+"#....F..S..#",
+"#..........#",
+"#....c.....#",
+"#......d...#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..a..S.b..#",
+"#....F.....#",
+"#..........#",
+"#....c.....#",
+"#......d...#",
+"#..........#",
+"#....>..F..#",
+"#..........#",
+"#..........#",
+"############"]]
+const ESCAPES3=[[
+"############",
+"#....##....#",
+"#..........#",
+"#....S.....#",
+"#...>......#",
+"#..........#",
+"#..##......#",
+"#..........#",
+"#......##..#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#...##.....#",
+"#....S.....#",
+"#....>.....#",
+"#..........#",
+"#.....##...#",
+"#..........#",
+"#..##......#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..##......#",
+"#....S.....#",
+"#..>....##.#",
+"#..........#",
+"#......##..#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....##....#",
+"#..........#",
+"#..S.......#",
+"#....>.....#",
+"#..........#",
+"#..##..S...#",
+"#..........#",
+"#......##..#",
+"#..........#",
+"#..........#",
+"############"]]
+const BEASTS3=[[9,8],[9,7],[9,6],[10,7]]
+const ESCAPES4=[[
+"############",
+"#....##....#",
+"#....S.....#",
+"#..........#",
+"#...>......#",
+"#..........#",
+"#..##......#",
+"#......S...#",
+"#......##..#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#...##.....#",
+"#....S.....#",
+"#..>.......#",
+"#..........#",
+"#.....##...#",
+"#.....S....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..##......#",
+"#....S.....#",
+"#..>....##.#",
+"#..........#",
+"#......##..#",
+"#.....S....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....##....#",
+"#..........#",
+"#..S.......#",
+"#....>.....#",
+"#..........#",
+"#..##..S...#",
+"#..........#",
+"#......##..#",
+"#..........#",
+"#..........#",
+"############"]]
+const BEASTS4=[[9,8],[10,8],[9,7],[10,7]]
+const PITS4=[[
+"############",
+"#OOOOOOOOOO#",
+"#O..SFOO..O#",
+"#O.O.OO...O#",
+"#O........O#",
+"#O..OO>O..O#",
+"#O........O#",
+"#O...OO...O#",
+"#O..OOOO..O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O....SO..O#",
+"#O.OOOOO..O#",
+"#O....O...O#",
+"#O..O>O...O#",
+"#O....F...O#",
+"#O..OOOOO.O#",
+"#O....O...O#",
+"#O........O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O....O...O#",
+"#O..OOO...O#",
+"#O....S...O#",
+"#OF..O.>..O#",
+"#O....OOO.O#",
+"#O........O#",
+"#O..OOO...O#",
+"#O....O...O#",
+"#OOOOOOOOOO#",
+"############"],[
+"############",
+"#OOOOOOOOOO#",
+"#O..F.O...O#",
+"#O..OOO...O#",
+"#O....S...O#",
+"#O...O.>..O#",
+"#O....OOO.O#",
+"#O........O#",
+"#O..OOO...O#",
+"#O....O...O#",
+"#OOOOOOOOOO#",
+"############"]]
+const IDOLS4=[[
+"############",
+"#..........#",
+"#..ggg.....#",
+"#..gISg....#",
+"#...Sgg....#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#...>......#",
+"############"],[
+"############",
+"#..........#",
+"#....ggg...#",
+"#...gSIg...#",
+"#....gg....#",
+"#....S.....#",
+"#..........#",
+"#....#.....#",
+"#..........#",
+"#..........#",
+"#.....>....#",
+"############"],[
+"############",
+"#..........#",
+"#...gg.....#",
+"#..gSIg....#",
+"#...gg..S..#",
+"#..........#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#....>.....#",
+"############"]]
+const CRACKS4=[[
+"############",
+"#....Sx....#",
+"#.#####....#",
+"#....##....#",
+"#..x.>#....#",
+"#....##....#",
+"#....##....#",
+"#..x.......#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....x.....#",
+"#...S.####.#",
+"#....##....#",
+"#....##....#",
+"#..xx.>....#",
+"#....##....#",
+"#.....####.#",
+"#....x.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....x.....#",
+"#..######..#",
+"#....S..#..#",
+"#...x...#..#",
+"#..x.>..#..#",
+"#...x...#..#",
+"#..######..#",
+"#....x.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..S.x.....#",
+"#..######..#",
+"#.......#..#",
+"#..xx...#..#",
+"#....>..#..#",
+"#.......#..#",
+"#..######..#",
+"#....x.....#",
+"#..........#",
+"#..........#",
+"############"]]
+const HALLS4=[[
+"############",
+"#..........#",
+"#..a..S.b..#",
+"#..........#",
+"#....F.....#",
+"#....c.....#",
+"#......d...#",
+"#.....S....#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#....b..S..#",
+"#..a.......#",
+"#....F.....#",
+"#....c..d..#",
+"#.....S....#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..a....b..#",
+"#....F..S..#",
+"#..........#",
+"#....c.....#",
+"#......d...#",
+"#.....S....#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..a..S.b..#",
+"#....F.....#",
+"#..........#",
+"#....c.....#",
+"#...S..d...#",
+"#..........#",
+"#....>..F..#",
+"#..........#",
+"#..........#",
+"############"]]
+const ESCAPES5=[[
+"############",
+"#....##....#",
+"#....S.....#",
+"#..........#",
+"#...>......#",
+"#..........#",
+"#..##......#",
+"#..........#",
+"#......##..#",
+"#....S.....#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#...##.....#",
+"#....S.....#",
+"#..>.......#",
+"#..........#",
+"#.....##...#",
+"#....S.....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..##......#",
+"#....S.....#",
+"#..>....##.#",
+"#..........#",
+"#......##..#",
+"#....S.....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....##....#",
+"#..........#",
+"#..S.......#",
+"#....>.....#",
+"#..........#",
+"#..##..S...#",
+"#..........#",
+"#......##..#",
+"#....S.....#",
+"#..........#",
+"############"]]
+const BEASTS5=[[10,8],[10,7],[9,7],[9,6]]
+const ESCAPES6=[[
+"############",
+"#....##....#",
+"#....S.....#",
+"#..........#",
+"#...>......#",
+"#....S.....#",
+"#..##......#",
+"#......S...#",
+"#......##..#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#...##.....#",
+"#....S.....#",
+"#..>.......#",
+"#.....S....#",
+"#.....##...#",
+"#.....S....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#..........#",
+"#..##......#",
+"#....S.....#",
+"#..>....##.#",
+"#.....S....#",
+"#......##..#",
+"#.....S....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],[
+"############",
+"#....##....#",
+"#....S.....#",
+"#..S.......#",
+"#....>.....#",
+"#..........#",
+"#..##..S...#",
+"#..........#",
+"#......##..#",
+"#..........#",
+"#..........#",
+"############"]]
+const BEASTS6=[[10,8],[10,7],[9,7],[10,6]]
+const LEVEL_ORDER=[1,2,3,4,5,6]
+const LEVEL_ARCS={1:"foundation",2:"pressure",3:"ward",4:"hunt",5:"hollow",6:"finale"}
+const MODES={
+ standard:{label:"standard",desc:"full campaign"},
+ iron:{label:"iron",desc:"early beast"},
+ greed:{label:"greed",desc:"hot relics, costly gold"},
+ dark:{label:"dark",desc:"weak flame, fast dread"},
+ daily:{label:"daily",desc:"fixed daily seed"}
+}
+const MODE_IDS=Object.keys(MODES)
+const MODS={
+ thin:{label:"thin flame",desc:"torches burn faster"},
+ wake:{label:"wakeful beast",desc:"the beast starts hotter"},
+ rich:{label:"rich relics",desc:"more relics surface"},
+ gloom:{label:"heavy dread",desc:"darkness grips sooner"},
+ grace:{label:"strong shrines",desc:"wards hold longer"}
+}
+const MOD_IDS=Object.keys(MODS)
+const FLOOR_TEXT={
+ 1:["A first descent through stale rites.","The old ruin still pretends to be fair."],
+ 2:["Pressure arrives before understanding catches up.","Every branch feels closer to pursuit."],
+ 3:["Wards answer, but never for free.","Blessing and burden share the same stone."],
+ 4:["The hunt floor wants you heard.","Noise becomes destiny down here."],
+ 5:["The hollow floor strips runs to their bones.","Only the sharpest choices still matter."],
+ 6:["The last gate weighs what you became.","Every surviving system cashes in here."]
+}
+const FLOOR_THEMES={
+ 1:{name:"foundation",tag:"stale rite",accent:"verdigris",fog:"soft lantern fog"},
+ 2:{name:"pressure",tag:"ember choke",accent:"rust flare",fog:"hot dust"},
+ 3:{name:"ward",tag:"cold liturgy",accent:"aqua ward",fog:"glass mist"},
+ 4:{name:"hunt",tag:"rose alarm",accent:"pink hunt",fog:"thin red haze"},
+ 5:{name:"hollow",tag:"ash hush",accent:"bone gray",fog:"dry blackout"},
+ 6:{name:"finale",tag:"crown weather",accent:"gold ruin",fog:"judging dark"}
+}
+const ENEMY_TEXT={
+  beast:["A one-eyed pursuer that reads space better than fear.","It wants a lane, not a duel."],
+  shade:["A cold pass-through that feeds dread and tells on you.","It does not block the path; it poisons it."],
+  watcher:["A fixed witness that turns position into pursuit.","Quiet fails where it stands."],
+  leech:["A grave thing that eats ward and heat.","It survives by thinning what protects you."]
+}
+const SHRINE_TEXT=[
+  "The shrine lends shape to your nerve.",
+  "A ward forms, thin and listening.",
+  "The shrine answers, and the answer is costly."
+]
+const BRAZIER_TEXT=[
+  "The brazier spits up old warmth.",
+  "A hungry flame leans toward your torch.",
+  "The coals remember better fires than yours."
+]
+const CURSE_TEXT=[
+  "The stone bites back.",
+  "A mean seam in the floor wakes underfoot.",
+  "The room answers touch with dread."
+]
+const FINALE_NAMES=["Ash Gate","Gold Gate","Hush Gate","Ward Gate"]
+const INTRO_TEXT=["Move with arrows or WASD.","Carry flame. Bow for gold.","Wards hold. Cracks strip. The beast reads haste."].join("\n")
+const HINT_TEXT={
+ torch:"Take the torch early. Darkness taxes every step without it.",
+ ward:"Shrines raise ward. Ward softens dark pressure, then burns down.",
+ crack:"Cracks are fast but costly. Mask or ward makes the crossing safer.",
+ beast:"Fire slows pursuit. A dropped torch can buy one clean lane."
+}
+const RELICS={
+ ember:{name:"ember heart",label:"ember",up:"slower torch drain",down:"beast ignores dropped flame"},
+ tooth:{name:"gold tooth",label:"tooth",up:"gold slips the crack",down:"beast enrages sooner"},
+ hush:{name:"hush bell",label:"hush",up:"dread stays low",down:"fire never slows beast"},
+ eye:{name:"idol eye",label:"eye",up:"idol bows easier, shrines strengthen",down:"crown scorches torch"},
+ brand:{name:"night brand",label:"brand",up:"shades break on touch",down:"cursed ground bites harder"},
+ wick:{name:"long wick",label:"wick",up:"sight and dropped flame last longer",down:"carried torch burns hotter"},
+ chain:{name:"ward chain",label:"chain",up:"wards and shrines linger",down:"gold no longer softens torch loss"},
+ veil:{name:"veil thread",label:"veil",up:"mask protects torch through the crack",down:"shrines grant less"},
+ greave:{name:"pit greaves",label:"greave",up:"pit footing stays sure",down:"crack crossings cost extra"},
+ lure:{name:"lure spool",label:"lure",up:"dropped flame always pulls the beast",down:"carried fire never slows it"},
+ salt:{name:"salt sigil",label:"salt",up:"watchers and curses bite softer",down:"shades drain more torch"},
+ ash:{name:"ash lung",label:"ash",up:"braziers flare stronger",down:"shrines sip your torch"}
+}
+const RELIC_IDS=Object.keys(RELICS)
+const RELIC_SPOTS={
+1:[["b",7,2],["v",8,8],["h",8,8]],
+2:[["h",8,4],["v",8,8],["p",2,8]],
+3:[["i",2,8],["c",2,1],["v",8,8],["h",8,8]],
+4:[["h",8,8],["i",8,8],["p",2,8],["v",8,8]],
+5:[["h",8,8],["i",8,8],["c",2,1],["v",2,8],["p",8,8]],
+6:[["e",8,8],["e",2,8],["e",8,2]]
+}
+const BRAZIER_SPOTS={
+1:[["h",8,8],["p",2,8]],
+2:[["h",8,8],["v",2,8],["c",8,8]],
+3:[["h",8,8],["i",8,8],["p",2,8],["v",2,8]],
+4:[["h",8,8],["i",8,8],["p",2,8],["v",2,8]],
+5:[["h",8,8],["i",8,8],["p",2,8],["v",2,8],["c",8,8]],
+6:[["e",8,2],["e",2,8],["e",8,8]]
+}
+const SHRINE_SPOTS={
+1:[["i",2,8]],
+2:[["h",8,4],["v",8,8]],
+3:[["h",8,4],["i",8,8],["c",8,8]],
+4:[["h",8,4],["i",8,8],["c",8,8],["p",8,4]],
+5:[["h",8,4],["i",8,8],["c",8,8],["v",8,8],["p",8,4]],
+6:[["e",8,4],["e",3,3],["e",8,8]]
+}
+const CURSE_SPOTS={
+1:[["h",8,8],["p",8,2],["c",8,8]],
+2:[["h",7,4],["c",2,1],["p",8,8],["v",8,4]],
+3:[["h",7,4],["i",8,8],["c",7,1],["p",8,8],["v",8,4]],
+4:[["h",7,4],["i",8,8],["c",7,1],["p",8,8],["v",8,4]],
+5:[["h",7,4],["i",8,8],["c",7,1],["p",8,8],["v",8,4],["b",8,8]],
+6:[["e",8,8],["e",2,2],["e",8,2],["e",3,8]]
+}
+const SHADE_SPOTS={
+1:[["h",9,4],["p",8,8]],
+2:[["h",9,4],["c",8,8],["v",8,8]],
+3:[["h",9,4],["i",8,8],["c",8,8],["p",8,4]],
+4:[["h",9,4],["i",8,8],["c",8,8],["p",8,4],["v",8,8]],
+5:[["h",9,4],["i",8,8],["c",8,8],["p",8,4],["v",8,8],["b",8,8]],
+6:[["e",8,8],["e",2,8],["e",8,2],["e",3,8]]
+}
+const BLOCK_SPOTS={
+1:[],
+2:[["h",7,8],["p",2,8],["v",2,4]],
+3:[["h",7,8],["p",2,8],["c",8,2],["v",2,4]],
+4:[["h",7,8],["p",2,8],["c",8,2],["v",2,4],["b",8,8]],
+5:[["h",7,8],["p",2,8],["c",8,2],["v",2,4],["b",8,8],["i",8,4]],
+6:[["e",2,4],["e",7,7],["e",2,7]]
+}
+const WATCHER_SPOTS={
+1:[],
+2:[["h",8,8],["v",8,8]],
+3:[["h",8,8],["c",2,8],["v",8,8]],
+4:[["h",8,8],["c",2,8],["p",8,8],["v",8,8]],
+5:[["h",8,8],["c",2,8],["p",8,8],["v",8,8],["i",8,8]],
+6:[["e",8,2],["e",2,8]]
+}
+const LEECH_SPOTS={
+1:[],
+2:[],
+3:[["p",8,8],["c",8,8]],
+4:[["p",8,8],["c",8,8],["v",8,8]],
+5:[["p",8,8],["c",8,8],["v",8,8],["h",8,4]],
+6:[["e",8,8],["e",3,3]]
+}
+const LEVELS={
+1:{pits:PITS,idols:IDOLS,cracks:CRACKS,halls:HALLS,escapes:ESCAPES,beasts:BEASTS,dark:"pecv",tone:"The air is stale with old rites."},
+2:{pits:PITS2,idols:IDOLS2,cracks:CRACKS2,halls:HALLS2,escapes:ESCAPES2,beasts:BEASTS2,dark:"behipcv",tone:"The ruin tightens. It knows your name now."},
+3:{pits:PITS3,idols:IDOLS3,cracks:CRACKS3,halls:HALLS3,escapes:ESCAPES3,beasts:BEASTS3,dark:"behipcv",tone:"The shrines still answer, but every blessing exacts a price."},
+4:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES4,beasts:BEASTS4,dark:"behipcv",tone:"The hunt floor listens for every sound you make."},
+5:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES5,beasts:BEASTS5,dark:"behipcv",tone:"The hollow floor strips away whatever was merely enough."},
+6:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES6,beasts:BEASTS6,dark:"behipcv",tone:"The final gate wakes. Everything left in you will be tested."}
+}
+const BASE={
+g:{m:[
+"############",
+"#..........#",
+"#..L.....R.#",
+"#..........#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],ex:{">":"h",L:"b",R:"e"}},
+b:{m:[
+"############",
+"#..........#",
+"#...MT.....#",
+"#..........#",
+"#..........#",
+"#.....>....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],ex:{">":"h"}},
+v:{m:[
+"############",
+"#..........#",
+"#....C.K...#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#..........#",
+"#....>.....#",
+"#..........#",
+"############"],ex:{">":"e"}},
+d:{m:["############","#..........#","#..........#","#..........#","#....X.....#","#..........#","#..........#","#..........#","#..........#","#..........#","#..........#","############"],ex:{}}
+}
+const BASE2={
+g:{m:[
+"############",
+"#..........#",
+"#..L..#..R.#",
+"#..........#",
+"#....#.....#",
+"#....>.....#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],ex:{">":"h",L:"b",R:"e"}},
+b:{m:[
+"############",
+"#..........#",
+"#...MT.....#",
+"#....#.....#",
+"#..........#",
+"#..#..>....#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],ex:{">":"h"}},
+v:{m:[
+"############",
+"#..........#",
+"#...#C.K...#",
+"#..........#",
+"#....#.....#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#...>......#",
+"#..........#",
+"############"],ex:{">":"e"}},
+d:BASE.d
+}
+const BASE3={
+g:{m:[
+"############",
+"#..........#",
+"#..L..S..R.#",
+"#..........#",
+"#....#.....#",
+"#....>.....#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],ex:{">":"h",L:"b",R:"e"}},
+b:{m:[
+"############",
+"#..........#",
+"#..SMT.....#",
+"#....#.....#",
+"#..........#",
+"#..#..>....#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#..........#",
+"############"],ex:{">":"h"}},
+v:{m:[
+"############",
+"#..........#",
+"#...#C.K.S.#",
+"#..........#",
+"#....#.....#",
+"#..........#",
+"#.....#....#",
+"#..........#",
+"#..........#",
+"#...>......#",
+"#..........#",
+"############"],ex:{">":"e"}},
+d:BASE.d
+}
+const BASES={1:BASE,2:BASE2,3:BASE3,4:BASE3,5:BASE3,6:BASE3}
+const SEl=document.getElementById("s"),U=document.getElementById("u"),G=document.getElementById("g"),I=document.getElementById("i"),L=document.getElementById("l"),X=document.getElementById("r")
+let seed=0,B0=[10,8],R,S,V={hall:0,pit:0,idol:0,crack:0,escape:0,beast:0},DBG={show:0,out:""},O={relics:[],curses:[],shades:[],blocks:[],braziers:[],shrines:[],watchers:[],leeches:[]}
+
+function rng(n){
+  return function(){
+    n|=0;n=n+0x6D2B79F5|0
+    let t=Math.imul(n^n>>>15,1|n)
+    t=t+Math.imul(t^t>>>7,61|t)^t
+    return ((t^t>>>14)>>>0)/4294967296
+  }
+}
+function rollSeed(){return Math.floor(Math.random()*1e9)}
+function pickSpots(r,spots,n){
+  const bag=spots.slice(),out=[]
+  for(let i=0;i<n&&bag.length;i++)out.push(...bag.splice((r()*bag.length)|0,1))
+  return out
+}
+function pickMods(seed0){
+  const r=rng(seed0+404),bag=MOD_IDS.slice(),out=[]
+  while(out.length<2&&bag.length)out.push(bag.splice((r()*bag.length)|0,1)[0])
+  return out
+}
+function hash(s){let n=0;for(const ch of s)n=(n*31+ch.charCodeAt(0))|0;return Math.abs(n)}
+function modeMods(mode){
+  if(mode=="iron")return ["wake"]
+  if(mode=="greed")return ["rich"]
+  if(mode=="dark")return ["thin","gloom"]
+  return []
+}
+function hasMod(id){return S.mods&&S.mods.includes(id)}
+function modSummary(){return S.mods.map(id=>MODS[id].label).join(", ")}
+function showHint(id,text=HINT_TEXT[id]){
+  if(!S.hints[id]){
+    S.hints[id]=1
+    S.hint=`hint   ${text}`
+  }
+}
+function boolMark(v){return v?"✓":"-"}
+function statRow(k,v){return `${k.padEnd(7)} ${v}`}
+function loseWard(n){
+  const was=S.flags.ward||0
+  S.flags.ward=Math.max(0,was-n)
+  if(was&&!S.flags.ward)S.fx="ward"
+}
+function campOffers(next){
+  const r=rng(seed+next*313),pool=RELIC_IDS.filter(id=>id!=S.flags.relic),a=pool.splice((r()*pool.length)|0,1)[0],b=pool.splice((r()*pool.length)|0,1)[0]
+  return [a,b]
+}
+
+function build(seed0){
+  const L=LEVELS[S&&S.level||1],r=rng(seed0+((S&&S.level||1)-1)*9973)
+  const B=BASES[S&&S.level||1]
+  V={hall:(r()*L.halls.length)|0,pit:(r()*L.pits.length)|0,idol:(r()*L.idols.length)|0,crack:(r()*L.cracks.length)|0,escape:(r()*L.escapes.length)|0,beast:(r()*L.beasts.length)|0}
+  B0=L.beasts[V.beast]
+  const relicBag=RELIC_IDS.slice().sort(()=>r()-.5)
+  const level=S&&S.level||1
+  O={relics:pickSpots(r,RELIC_SPOTS[level]||[],(level>=5?4:level>=3?3:2)+(S&&S.mods&&S.mods.includes("rich")?1:0)).map((v,i)=>({r:v[0],x:v[1],y:v[2],id:relicBag[i%relicBag.length],on:1})),
+    braziers:pickSpots(r,BRAZIER_SPOTS[level]||[],level>=5?3:level>=3?2:1).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
+    shrines:pickSpots(r,SHRINE_SPOTS[level]||[],level>=4?3:level>=3?2:1).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
+    curses:pickSpots(r,CURSE_SPOTS[level]||[],level==1?1:level>=5?3:2).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
+    shades:pickSpots(r,SHADE_SPOTS[level]||[],Math.min(level+1,5)).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
+    watchers:pickSpots(r,WATCHER_SPOTS[level]||[],Math.max(0,level-1)).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
+    leeches:pickSpots(r,LEECH_SPOTS[level]||[],Math.max(0,level-2)).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
+    blocks:pickSpots(r,BLOCK_SPOTS[level]||[],99).map(v=>({r:v[0],x:v[1],y:v[2],on:1}))}
+  R={
+    g:B.g,b:B.b,v:B.v,d:B.d,
+    h:{m:L.halls[V.hall],ex:{a:"p",b:"i",c:"c",d:"d",">":"g"}},
+    p:{m:L.pits[V.pit],ex:{">":"v"}},
+    i:{m:L.idols[V.idol],ex:{">":"h"}},
+    c:{m:L.cracks[V.crack],ex:{">":"v"}},
+    e:{m:L.escapes[V.escape],ex:{">":"g"}}
+  }
+}
+
+function buildTitle(){
+  const z=runStyle()
+  if(S.flags.relic=="chain"||S.path.shrines>2)return "Warded Pilgrim"
+  if(S.flags.gold&&z.route=="crack")return "Gold-Bound Runner"
+  if(S.flags.relic=="lure"||S.path.drops>1)return "Beast Angler"
+  if(S.flags.mask&&S.flags.relic=="veil")return "Veiled Diver"
+  if(S.flags.relic=="greave"||z.route=="pit")return "Pit Warden"
+  if(S.flags.relic=="hush"||S.mode=="dark")return "Hush Walker"
+  return runStyle().style.replace(/\b\w/g,m=>m.toUpperCase())
+}
+function enemyNote(kind){
+  const arr=ENEMY_TEXT[kind]
+  return arr[(seed+S.level+kind.length)%arr.length]
+}
+function flavor(kind){
+  const pool=kind=="shrine"?SHRINE_TEXT:kind=="brazier"?BRAZIER_TEXT:CURSE_TEXT
+  return pool[(seed+S.turn+S.level)%pool.length]
+}
+function floorLine(level=S.level){
+  const arr=FLOOR_TEXT[level]
+  return arr[(seed+level)%arr.length]
+}
+function finaleName(){
+  const idx=(hash((S.flags.relic||"plain")+runStyle().route+(S.flags.gold?"g":"n")+(S.flags.ward?"w":"d")))%FINALE_NAMES.length
+  return FINALE_NAMES[idx]
+}
+function openTitle(){
+  seed=0
+  S={gameState:"title",mode:"standard",currentMode:"standard",alive:1,win:0,level:1,currentLevel:1,msg:"",endLead:"",deathCause:"",mods:[],flags:{},path:{},seen:{},turn:0}
+}
+function startRun(mode="standard",fresh=1){
+  const dailySeed=hash(new Date().toISOString().slice(0,10))
+  seed=mode=="daily"?dailySeed:(fresh||!seed?rollSeed():seed)
+  const picked=pickMods(seed),forced=modeMods(mode),mods=[...new Set([...picked,...forced])].slice(0,3)
+  S={level:1,currentLevel:1,mode,currentMode:mode}
+  S.mods=mods
+  build(seed)
+  S={seed,mode,currentMode:mode,mods:S.mods,level:1,currentLevel:1,gameState:"play",deathCause:"",endTitle:"",endLead:"",fx:"shift",r:"g",x:P.g[0],y:P.g[1],alive:1,win:0,turn:0,crownTurn:-1,chase:0,dread:0,msg:`Begin floor 1. ${floorLine(1)}`,hint:"",intro:1,hints:{torch:0,ward:0,crack:0,beast:0},flags:{idol:0,gold:mode=="greed",torch:0,ash:0,crown:0,key:0,mask:0,ward:0,relic:"",relicPlus:0},beast:{x:B0[0],y:B0[1]},drop:null,path:{pit:0,crack:0,drops:0,shrines:0,relics:0,shades:0,watchers:0,leeches:0,camps:0,levels:1,finale:0},camp:null,seen:{},end:"",finaleName:""}
+}
+function reset(fresh){
+  if(fresh)openTitle()
+  else startRun(S&&S.mode||"standard",0)
+}
+openTitle()
+
+function enterLevel(next){
+  const keep={torch:S.flags.torch,ash:S.flags.ash,mask:S.flags.mask,gold:S.flags.gold,ward:S.flags.ward,relic:S.flags.relic,relicPlus:S.flags.relicPlus}
+  const intro=S.intro,hints=S.hints
+  S.level=next
+  S.currentLevel=next
+  build(seed)
+  S.r="g";S.x=P.g[0];S.y=P.g[1];S.turn=0;S.crownTurn=-1;S.chase=0;S.dread=0
+  S.flags={idol:0,gold:keep.gold,torch:keep.torch,ash:keep.ash,crown:0,key:0,mask:keep.mask,ward:next>=3?keep.ward:0,relic:keep.relic,relicPlus:keep.relicPlus}
+  S.beast={x:B0[0],y:B0[1]}
+  S.drop=null
+  S.path={pit:0,crack:0,drops:S.path.drops,shrines:S.path.shrines,relics:S.path.relics,shades:S.path.shades,watchers:S.path.watchers,leeches:S.path.leeches,camps:S.path.camps,levels:next,finale:S.path.finale}
+  S.intro=intro
+  S.hints=hints
+  S.hint=""
+  S.fx="shift"
+  setMsg(`Enter floor ${next}. Title: ${buildTitle()}. ${floorLine(next)}`)
+}
+
+function startCamp(next){
+  S.gameState="camp"
+  S.path.camps++
+  S.camp={next,offer:campOffers(next)}
+  S.endTitle=`camp | floor ${S.level} cleared`
+  S.endLead=`Between floors, you can temper or trade your relic before Level ${next} (${LEVEL_ARCS[next]}).`
+  S.fx="shift"
+}
+
+function startFinale(){
+  const keep={torch:S.flags.torch,ash:S.flags.ash,mask:S.flags.mask,gold:S.flags.gold,ward:S.flags.ward,relic:S.flags.relic,relicPlus:S.flags.relicPlus}
+  S.level=6
+  S.currentLevel=6
+  S.path.finale=1
+  const fName=finaleName(),fOffset=FINALE_NAMES.indexOf(fName)
+  build(seed+909+fOffset*131)
+  S.gameState="play"
+  S.r="e";S.x=P.e[0];S.y=P.e[1];S.turn=0;S.crownTurn=0;S.chase=2;S.dread=0
+  S.flags={idol:1,gold:keep.gold,torch:Math.max(keep.torch,4),ash:keep.ash,crown:1,key:1,mask:keep.mask,ward:Math.max(keep.ward,hasMod("grace")?10:8),relic:keep.relic,relicPlus:keep.relicPlus}
+  S.beast={x:B0[0],y:B0[1]}
+  S.drop=null
+  S.finaleName=fName
+  S.hint=""
+  S.fx="shift"
+  setMsg(`${fName}. Title: ${buildTitle()}. Carry the crown through the last warded gate.`)
+}
+
+function applyCampChoice(choice){
+  if(!S.camp)return
+  if(choice=="1"){
+    if(S.flags.relic)S.flags.relicPlus=Math.min(2,S.flags.relicPlus+1)
+    else S.flags.relic=S.camp.offer[0]
+  }
+  if(choice=="2")S.flags.relic=S.camp.offer[0],S.flags.relicPlus=0
+  if(choice=="3")S.flags.relic=S.camp.offer[1],S.flags.relicPlus=0
+  if(choice=="4"){
+    S.flags.relic=""
+    S.flags.relicPlus=0
+    S.flags.torch=Math.max(S.flags.torch,6)
+    S.flags.ward=Math.max(S.flags.ward,6)
+  }
+  S.gameState="play"
+  enterLevel(S.camp.next)
+  S.camp=null
+}
+
+function base(x,y,r=S.r){return R[r].m[y][x]}
+function overAt(r,x,y,t){return O[t].find(o=>o.on&&o.r==r&&o.x==x&&o.y==y)}
+function roomKey(r=S.r){return `${S.level}:${r}`}
+function sight(){
+  if(!dark())return 99
+  let v=S.flags.torch?5:S.flags.ward?4:S.flags.mask?3:2
+  if(S.flags.relic=="ember")v++
+  if(S.flags.relic=="wick")v++
+  if(S.r=="e")v++
+  return v
+}
+function visible(x,y,r=S.r){
+  if(r!=S.r)return 0
+  if(!dark(r))return 1
+  return Math.abs(x-S.x)+Math.abs(y-S.y)<=sight()
+}
+function remember(){
+  const k=roomKey()
+  S.seen[k]||(S.seen[k]={})
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(visible(x,y))S.seen[k][`${x},${y}`]=1
+}
+function seen(x,y,r=S.r){
+  const k=`${S.level}:${r}`
+  return !!(S.seen[k]&&S.seen[k][`${x},${y}`])
+}
+function tile(x,y,r=S.r){
+  if(overAt(r,x,y,"blocks"))return "#"
+  if(S.drop&&S.drop.r==r&&S.drop.x==x&&S.drop.y==y&&S.drop.fuel)return "T"
+  if(overAt(r,x,y,"braziers"))return "F"
+  if(overAt(r,x,y,"shrines"))return "S"
+  if(overAt(r,x,y,"relics"))return "r"
+  if(overAt(r,x,y,"shades"))return "n"
+  if(overAt(r,x,y,"watchers"))return "q"
+  if(overAt(r,x,y,"leeches"))return "l"
+  if(overAt(r,x,y,"curses"))return "z"
+  if(r=="b"&&S.flags.mask&&x==4&&y==2)return "."
+  if(r=="b"&&S.flags.torch&&x==5&&y==2)return "."
+  return base(x,y,r)
+}
+function setMsg(msg){S.msg=msg}
+function die(msg,cause=msg){S.alive=0;S.gameState="dead";S.deathCause=cause;S.endTitle="dead";S.endLead=msg;S.fx="hit";setMsg(msg);S.end=summary()}
+function win(){S.win=1;S.gameState="win";S.endTitle="dawn";S.endLead="You escape alive.";S.fx="win";setMsg("Dawn spills through the gate. You escape alive.");S.end=summary()}
+function sign(n){return n<0?-1:n>0?1:0}
+function dist(ax,ay,bx,by){return Math.abs(ax-bx)+Math.abs(ay-by)}
+function dark(r=S.r){return LEVELS[S.level].dark.includes(r)}
+function carriedFire(){return S.flags.torch&&!S.flags.mask}
+function fire(){return carriedFire()||(S.drop&&S.drop.r=="e"&&S.drop.fuel)}
+
+function runStyle(){
+  const route=S.path.pit>S.path.crack?"pit":S.path.crack>S.path.pit?"crack":"mixed"
+  let style="pilgrim"
+  if(S.flags.relic=="ember")style="ember runner"
+  else if(S.flags.relic=="tooth")style="greed runner"
+  else if(S.flags.relic=="hush")style="hush walker"
+  else if(S.flags.relic=="eye")style="idol sworn"
+  else if(S.flags.relic=="brand")style="shade breaker"
+  else if(S.flags.relic=="wick")style="longflame scout"
+  else if(S.flags.relic=="chain")style="ward binder"
+  else if(S.flags.relic=="veil")style="veiled diver"
+  else if(S.flags.relic=="greave")style="pit runner"
+  else if(S.flags.relic=="lure")style="beast angler"
+  else if(S.flags.relic=="salt")style="salt walker"
+  else if(S.flags.relic=="ash")style="brazier feeder"
+  else if(S.path.shrines)style="ward bearer"
+  else if(S.flags.mask&&route=="crack")style="mask runner"
+  else if(S.path.drops)style="torch tamer"
+  else if(S.flags.gold)style="gold bearer"
+  else if(route=="pit")style="warded crawl"
+  return {route,style}
+}
+
+function roomMsg(r=S.r){
+  if(r=="g")return S.flags.crown&&S.flags.key?(S.level==1?"The gate shudders instead of opening. Something deeper calls you on.":S.level<5?"The gate yields, but the campaign is not done with you yet.":S.level==5?"The gate opens onto the final road.": "The last gate waits. Only what survives the shrines goes home."):(S.level==1?"The broken gate yawns behind you. Bones left, beast right, ruin below.":S.level==2?"The gate is still shut. The deeper ruin waits below.":S.level==3?"The gate is quiet, but the shrines are not.":S.level==4?"The hunt floor waits below the gate, listening.":S.level==5?"The hollow floor waits below the gate, hungry for what remains.":"The final gate is quiet. Shrines and hunger ring it like judges.")
+  if(r=="b")return S.flags.torch?(S.level==1?"The bone room is dim now, only soot and old footprints.":S.level==2?"The bones are freshened by newer ash. Even the dead have been disturbed.":"The bones are carved with ward-scratches. Someone learned too late."):(S.level==1?"A torch and a funeral mask wait among the bones.":S.level==2?"A torch and a funeral mask wait among the bones, as if placed for your return.":"A torch, a mask, and an old shrine wait among the bones.")
+  if(r=="e"){
+    const b=beastState()
+    if(b=="calm")return carriedFire()?`Your torch keeps the beast at bay for now. ${enemyNote("beast")}`:`A one-eyed beast prowls here. Every step draws it closer. ${enemyNote("beast")}`
+    if(b=="alert")return S.flags.gold?`The beast is quickened by gold, but fire still buys you time. ${enemyNote("beast")}`:`The beast has your scent now. Fire buys you time, not safety. ${enemyNote("beast")}`
+    return "The beast is enraged. There is an opening, but no mercy."
+  }
+  if(r=="h")return S.level==1?"A long hall divides the ruin: pit left supports control; crack right rewards speed.":S.level==2?"The hall is tighter now. Every branch feels one step closer to the beast.":S.level==3?"The hall is strung with ward-shrines. Blessing and danger live in the same stone.":S.level==4?"The hall is full of watchers. Noise becomes pursuit here.":"The hall is bare and hollow. Every route feels like the wrong one."
+  if(r=="p")return carriedFire()?(S.level==1?"Torchlight steadies the pit's edge.":S.level==2?"Torchlight finds only slivers of safe stone over the pit.":S.level==3?"Wardlight softens the pit, but it drinks your flame.":S.level==4?"Torchlight catches every false edge in the hunt pit.":"The pit remembers every step. Safe footing is never free."):S.level==1?"The pit is blind and wide. Stay to the wall.":S.level==2?"The pit feels hungrier now. The dark is close on every side.":S.level==3?"The pit answers shrines, not fear. Empty hands are still not enough.":S.level==4?"The pit keeps no safe secrets once the flame is gone.":"The pit is the hollow floor's oldest lie."
+  if(r=="i")return S.flags.mask?(S.level==1?"The idol does not care for your mask, only your bow.":S.level==2?"The idol has learned your face beneath the mask. Bow anyway.":S.level==3?"The idol and the shrine answer each other. Even masked, you must bow.":"The idol sees through every build you've made. Bow anyway."):(S.level==1?"The idol waits in gold. Bow before you claim what it guards.":S.level==2?"The idol waits in harsher silence. Bow before you claim what it guards.":S.level==3?"The idol can steady a ward, but the crown will try to break it.":"The idol is colder now. Every blessing here feels conditional.")
+  if(r=="c")return S.flags.mask?(S.level==1?"The mask lets you slip the crack with more than bone and breath.":S.level==2?"The mask lets you slip the crack, but the stone still wants your flame.":S.level==3?"A live ward can force the crack open, but it will cost you.":"The crack listens for weakness. A mask only fools part of it."):(S.level==1?"The crack is narrow and mean. Quick to cross, but it steals flame.":S.level==2?"The crack runs longer now: quick, cruel, and eager to waste your time.":S.level==3?"The crack can be bought with ward or paid for with your body.":"The crack is now a wager: speed against whatever fire you still have.")
+  if(r=="v")return S.flags.crown?(S.level==1?"The vault is emptying into chaos. Take the key and flee.":S.level==2?"The vault is tighter, meaner, and already waking the beast.":S.level==3?"The vault hums against your ward. Take the key and run before the blessing breaks.":S.level==4?"The vault is alive with watchers. The theft is the easy part.":"The final vault sheds every comfort. Take the key and survive the reckoning."):(S.level==1?"In the vault, the crown gleams beside a small iron key.":S.level==2?"The same crown waits again, but the ruin holds it with a tighter grip.":S.level==3?"The crown waits beside old shrine-scratches. Someone once tried to survive this place.":S.level==4?"The crown waits in a vault built to wake pursuit.":"The crown waits at the bottom of the hollow run, brighter than mercy.")
+  return "You are dead. Press r to begin again."
+}
+
+function inv(){
+  const f=S.flags
+  return [
+    "inventory",
+    statRow("torch",f.torch?f.torch:f.ash?"burnt":"-"),
+    statRow("ward",f.ward||"-"),
+    statRow("relic",f.relic?RELICS[f.relic].label+(f.relicPlus?` +${f.relicPlus}`:""):"-"),
+    statRow("mask",boolMark(f.mask)),
+    statRow("idol",boolMark(f.idol)),
+    statRow("crown",boolMark(f.crown)),
+    statRow("key",boolMark(f.key)),
+    statRow("gold",boolMark(f.gold))
+  ].join("\n")
+}
+
+function summary(){
+  const z=runStyle()
+  const build=S.flags.relic?S.flags.relic:S.flags.mask?"mask":S.path.shrines?"ward":S.flags.gold?"gold":"plain"
+  return `seed ${S.seed.toString(36)} | level ${S.level} | arc ${LEVEL_ARCS[S.level]} | turns ${S.turn} | route ${z.route} | style ${z.style} | build ${build} | mods ${modSummary()} | torch ${S.flags.torch||0} | ward ${S.flags.ward||0} | gold ${S.flags.gold?"yes":"no"} | bowed ${S.flags.idol?"yes":"no"} | mask ${S.flags.mask?"yes":"no"} | relic ${S.flags.relic||"none"}${S.flags.relicPlus?`+${S.flags.relicPlus}`:""} | camps ${S.path.camps} | drops ${S.path.drops} | shrines ${S.path.shrines} | shades ${S.path.shades} | watchers ${S.path.watchers} | leeches ${S.path.leeches} | finale ${S.path.finale?"yes":"no"} | beast ${beastState()}`
+}
+
+function endIdentity(){
+  const z=runStyle()
+  return `${z.style} | ${z.route} route`
+}
+
+function endStats(){
+  const z=runStyle()
+  const build=S.flags.relic?`${RELICS[S.flags.relic].name}${S.flags.relicPlus?` +${S.flags.relicPlus}`:""}`:S.flags.mask?"funeral mask":S.path.shrines?"warded":"plain"
+  const encounters=[
+    S.path.shades?`shades   ${S.path.shades}`:"",
+    S.path.watchers?`watchers ${S.path.watchers}`:"",
+    S.path.leeches?`leeches  ${S.path.leeches}`:"",
+    S.path.drops?`drops    ${S.path.drops}`:"",
+    S.path.shrines?`shrines  ${S.path.shrines}`:"",
+    S.path.camps?`camps    ${S.path.camps}`:"",
+    S.path.finale?`finale   yes`:""
+  ].filter(Boolean)
+  const lines=[
+    "run",
+    "------",
+    `seed    ${S.seed.toString(36)}`,
+    `level   ${S.level} (${LEVEL_ARCS[S.level]})`,
+    `mode    ${MODES[S.mode||"standard"].label}`,
+    `turns   ${S.turn}`,
+    `style   ${endIdentity()}`,
+    "",
+    "build",
+    "------",
+    `relic   ${build}`,
+    `mods    ${modSummary()}`,
+    `route   ${z.route}`,
+    "",
+    "state",
+    "------",
+    `torch   ${S.flags.torch||0}${S.flags.ash&&!S.flags.torch?" (burnt)":""}`,
+    `ward    ${S.flags.ward||0}`,
+    `gold    ${S.flags.gold?"yes":"no"}`,
+    `bowed   ${S.flags.idol?"yes":"no"}`,
+    `mask    ${S.flags.mask?"yes":"no"}`,
+    `beast   ${beastState()}`
+  ]
+  if(encounters.length)lines.push("","encounters","----------",...encounters)
+  return lines.join("\n")
+}
+
+function sidePanel(){
+  const z=runStyle()
+  const th=FLOOR_THEMES[S.level]
+  return `${inv()}\n\nrun\n${statRow("title",buildTitle())}\n${statRow("route",z.route)}\n${statRow("style",z.style)}\n${statRow("floor",`${S.level} ${th.name}`)}\n${statRow("mood",th.tag)}\n${statRow("mode",MODES[S.mode||"standard"].label)}\n${statRow("mods",modSummary())}\n${statRow("turns",S.turn)}\n${statRow("beast",beastState())}`
+}
+
+function frame(lines,w=31){
+  const body=lines.map(line=>{
+    const s=(line||"").slice(0,w)
+    return `| ${s}${" ".repeat(w-s.length)} |`
+  })
+  return [`+${"-".repeat(w+2)}+`,...body,`+${"-".repeat(w+2)}+`].join("\n")
+}
+function floorTheme(level=S.level){return FLOOR_THEMES[level]||FLOOR_THEMES[1]}
+function tileGlyph(t,x,y,vis){
+  if(vis&&x==S.x&&y==S.y)return "@"
+  if(vis&&S.r=="e"&&x==S.beast.x&&y==S.beast.y)return "B"
+  if(!vis&&t=="r")return "*"
+  if(!vis&&".#".includes(t))return t=="#"?"#":"."
+  return t=="."?".":t=="#"?"":t=="O"?"o":t=="r"?"*":t=="z"?"^":t=="x"?"!":t=="n"?"~":t=="q"?"Q":t=="l"?"j":t=="S"?"Y":t=="F"?"&":t=="T"?"t":t=="g"?"$":t=="M"?"m":t
+}
+function fogClass(x,y,vis,mem){
+  if(!vis&&!mem)return "u"
+  if(!vis)return "m fog3"
+  const d=Math.abs(x-S.x)+Math.abs(y-S.y),s=sight()
+  return d<=Math.max(1,s-2)?"v fog1":d<=Math.max(2,s-1)?"v mid fog2":"v far fog3"
+}
+function splash(title,sub,lines,footer){
+  return frame([title,"",sub,...lines,"",footer].filter(v=>v!==undefined),31)
+}
+
+function variantSummary(){
+  return `hall ${V.hall} | pit ${V.pit} | idol ${V.idol} | crack ${V.crack} | beast ${V.beast} | escape ${V.escape} | mods ${S.mods.join("/")}`
+}
+
+function escapeSolve(level=S.level,escapeIdx=V.escape,beastIdx=V.beast,torch=6){
+  const map=LEVELS[level].escapes[escapeIdx],start=P.e,beast=LEVELS[level].beasts[beastIdx],q=[[{x:start[0],y:start[1],bx:beast[0],by:beast[1],torch,chase:0,ward:level==3?8:0},""]],seen=new Set()
+  while(q.length){
+    const [s,path]=q.shift(),k=[s.x,s.y,s.bx,s.by,s.torch,s.chase,s.ward].join()
+    if(seen.has(k))continue
+    seen.add(k)
+    for(const [dx,dy,ch] of [[1,0,"R"],[-1,0,"L"],[0,1,"D"],[0,-1,"U"]]){
+      const nx=s.x+dx,ny=s.y+dy,t=map[ny]&&map[ny][nx]
+      if(!t||t=="#")continue
+      if(t==">")return path+ch
+      let x=nx,y=ny,bx=s.bx,by=s.by,chase=s.chase,lit=s.torch>0,ward=s.ward
+      let left=Math.max(0,s.torch-((level==2||level==4||level==5)?2:1))
+      if(level>=3&&ward)left=Math.max(0,left-1)
+      let state=level>=6&&((!lit&&!ward)||chase>4)?"enraged":level>=6?"alert":level==5&&(!lit||chase>3)?"enraged":level==5?"alert":level==4&&(!lit||chase>4)?"enraged":level==4?"alert":level==3&&ward?"alert":level==2&&(!lit||chase>5)?"enraged":level==2?"alert":left?"alert":"enraged"
+      if(state=="alert"&&left&&!(chase++%2)){q.push([{x,y,bx,by,torch:left,chase,ward},path+ch]);continue}
+      for(let i=0;i<(state=="enraged"?2:1);i++){
+        if(Math.abs(x-bx)+Math.abs(y-by)<=1){bx=-1;break}
+        const ddx=x-bx,ddy=y-by,ax=Math.abs(ddx),ay=Math.abs(ddy)
+        let tries=ax>=ay?[[sign(ddx),0],[0,sign(ddy)]]:[[0,sign(ddy)],[sign(ddx),0]]
+        if(tries[0][0]||tries[0][1]){
+          const a=tries[0],b=tries[1]
+          const ca=cover(bx+a[0],by+a[1]),cb=cover(bx+b[0],by+b[1])
+          if(cb>ca)tries=[b,a]
+        }
+        for(const [mx,my] of tries){
+          const tx=bx+mx,ty=by+my
+          if((mx||my)&&map[ty]&&map[ty][tx]!="#"){bx=tx;by=ty;break}
+        }
+        if(Math.abs(x-bx)+Math.abs(y-by)<=1){bx=-1;break}
+      }
+      if(bx>=0)q.push([{x,y,bx,by,torch:left,chase,ward},path+ch])
+    }
+  }
+  return ""
+}
+
+function validateSeeds(n=24){
+  const keep=S
+  let bad=0,msg=[]
+  for(const level of [2,3,4,5,6])for(let i=0;i<n;i++){
+    const t={level,mods:keep.mods||pickMods(seed+i)}
+    S=t;build(seed+i)
+    const path=escapeSolve(level,V.escape,V.beast,level>=3?8:6)
+    if(!path){bad++;if(msg.length<6)msg.push(`l${level}:${(seed+i).toString(36)} e${V.escape} b${V.beast}`)}
+  }
+  S=keep
+  build(seed)
+  return `check ${n} seeds | ${bad?"bad "+bad+" "+msg.join(", "):"all clear"}`
+}
+
+function dropTorch(){
+  S.hint=""
+  if(S.flags.torch){
+    S.drop={r:S.r,x:S.x,y:S.y,fuel:S.flags.torch}
+    S.flags.torch=0
+    S.flags.ash=0
+    S.path.drops++
+    return setMsg("Set down the torch.")
+  }
+  if(S.drop&&S.drop.r==S.r&&S.drop.x==S.x&&S.drop.y==S.y&&S.drop.fuel){
+    S.flags.torch=S.drop.fuel
+    S.drop=null
+    return setMsg("Recover the torch.")
+  }
+}
+
+function beastState(){
+  if(hasMod("wake")&&S.r=="e"&&S.level<4)return "alert"
+  if(S.level==6&&S.r=="e"&&((!S.flags.ward&&!fire())||S.chase>4))return "enraged"
+  if(S.level==6&&S.r=="e")return "alert"
+  if(S.level==5&&S.r=="e"&&(!fire()||S.chase>3||S.path.shades>2))return "enraged"
+  if(S.level==5&&S.r=="e")return "alert"
+  if(S.level==4&&S.r=="e"&&(!fire()||S.chase>4||S.path.shades>1))return "enraged"
+  if(S.level==4&&S.r=="e")return "alert"
+  if(S.level==3&&S.flags.ward&&S.r=="e")return "alert"
+  if(S.level==3&&S.flags.ward&&S.flags.crown)return "alert"
+  if(S.flags.relic=="tooth"&&S.r=="e"&&S.chase>3)return "enraged"
+  if(S.level==2&&S.r=="e"&&(!fire()||S.chase>5&&!S.drop?.fuel))return "enraged"
+  if(S.level==2&&(S.r=="e"||S.flags.gold||S.flags.crown))return "alert"
+  if(S.flags.crown&&!fire())return "enraged"
+  if(S.flags.crown&&S.r=="e"&&S.chase>8)return "enraged"
+  if(S.flags.crown||S.flags.gold)return "alert"
+  return "calm"
+}
+
+function cover(x,y){
+  let n=0
+  for(const d of [[1,0],[-1,0],[0,1],[0,-1]])if(tile(x+d[0],y+d[1],"e")=="#")n++
+  return n
+}
+
+function beastTurn(){
+  if(S.r!="e"||!S.alive||S.win)return
+  const s=beastState()
+  if(s=="calm"&&fire())return
+  if(s=="alert"&&carriedFire()&&S.flags.relic!="hush"&&S.flags.relic!="lure"&&!(S.chase++%2))return
+  const lure=S.drop&&S.drop.r=="e"&&S.drop.fuel&&S.flags.relic!="ember"||S.flags.relic=="lure"&&S.drop&&S.drop.r=="e"&&S.drop.fuel
+  const tx=lure?S.drop.x:S.x,ty=lure?S.drop.y:S.y
+  const radius=s=="calm"?4:99
+  const speed=s=="enraged"?2:1
+  if(dist(S.x,S.y,S.beast.x,S.beast.y)<=1)return die("The beast is on you before you can breathe.")
+  if(dist(tx,ty,S.beast.x,S.beast.y)>radius)return
+  const bx=S.beast.x,by=S.beast.y
+  for(let i=0;i<speed;i++){
+    const dx=tx-S.beast.x,dy=ty-S.beast.y,ax=Math.abs(dx),ay=Math.abs(dy)
+    let tries=ax>=ay?[[sign(dx),0],[0,sign(dy)]]:[[0,sign(dy)],[sign(dx),0]]
+    if(tries[0][0]||tries[0][1]){
+      const a=tries[0],b=tries[1]
+      const ca=cover(S.beast.x+a[0],S.beast.y+a[1]),cb=cover(S.beast.x+b[0],S.beast.y+b[1])
+      if((s=="alert"||s=="enraged")&&cb>ca)tries=[b,a]
+    }
+    for(const [mx,my] of tries){
+      const nx=S.beast.x+mx,ny=S.beast.y+my
+      if((mx||my)&&tile(nx,ny,"e")!="#"){S.beast.x=nx;S.beast.y=ny;break}
+    }
+    if(lure&&S.beast.x==S.drop.x&&S.beast.y==S.drop.y){S.drop.fuel=0;setMsg("Beast stamps out the torch.");break}
+    if(dist(S.x,S.y,S.beast.x,S.beast.y)<=1)return die("The beast tears you open.")
+  }
+  if(bx!=S.beast.x||by!=S.beast.y)S.fx="beast"
+}
+
+function burnTorch(){
+  if(!S.alive||S.win||!dark())return
+  if(S.flags.torch){
+    let drain=(S.level==2||S.level>=4)&&"ec".includes(S.r)?2:1
+    if(S.level>=3&&S.flags.ward)drain++
+    if(hasMod("thin"))drain++
+    if(S.flags.relic=="wick")drain++
+    if(S.flags.relic=="ember")drain=Math.max(1,drain-1)
+    if(S.flags.relic=="eye"&&S.flags.crown)drain++
+    if(S.flags.relicPlus&&S.flags.relic=="ember")drain=Math.max(1,drain-S.flags.relicPlus)
+    if(!S.flags.gold||S.flags.relic=="chain"||S.turn%2){
+      S.flags.torch=Math.max(0,S.flags.torch-drain)
+      if(!S.flags.torch){S.flags.ash=1;if(!S.msg)setMsg("Torch gutters out.")}
+    }
+  }
+  if(S.drop&&S.drop.r==S.r&&S.drop.fuel){
+    let dropDrain=1
+    if(S.flags.relic=="wick")dropDrain=0
+    S.drop.fuel=Math.max(0,S.drop.fuel-dropDrain)
+    if(!S.drop.fuel&&!S.msg)setMsg("Dropped torch gutters out.")
+  }
+}
+
+function shadow(){
+  if(S.r=="e")return 0
+  if(S.level>=3&&S.flags.ward){
+    const wardLoss=hasMod("grace")||S.flags.relic=="chain"?0:1
+    if(wardLoss)loseWard(wardLoss)
+    if(S.dread)S.dread--
+    return 0
+  }
+  if(S.flags.relic=="hush"){if(S.dread)S.dread--;return 0}
+  if(S.flags.mask){if(S.dread)S.dread--;return 0}
+  if(dark()&&!S.flags.torch){
+    if(S.dread<(S.level==2?8:6))S.dread++
+    if(S.dread>(hasMod("gloom")?1:S.level==2?2:3)&&((S.turn+seed)&(hasMod("gloom")?1:S.level==2?2:3))==0)return 1
+  }else if(S.dread)S.dread--
+  return 0
+}
+
+function enter(r,x=P[r][0],y=P[r][1],msg){
+  S.hint=""
+  S.r=r;S.x=x;S.y=y
+  if(r=="e"){S.chase=0;if(S.flags.crown)S.beast={x:B0[0],y:B0[1]}}
+  if(r=="p")S.path.pit++
+  if(r=="c")S.path.crack++
+  if(r=="d")return die("The black arch keeps its promise.")
+  if(r=="e"&&dist(S.x,S.y,S.beast.x,S.beast.y)<=1)return die("The beast is on you before you can breathe.")
+  if(r=="c"&&S.flags.gold&&!S.flags.mask&&S.flags.relic!="tooth"){
+    if(S.level>=3&&S.flags.ward){loseWard(S.flags.relic=="greave"?4:3);msg="Ward parts the crack; the blessing thins."}
+    else return die("Weighted by treasure, you wedge fast in the crack.")
+  }
+  if(r=="c"&&S.flags.torch&&!(S.flags.relic=="veil"&&S.flags.mask)){
+    S.flags.torch=Math.max(0,S.flags.torch-(S.flags.relic=="greave"?2:S.flags.relic=="wick"?0:S.flags.torch))
+    S.flags.ash=!S.flags.torch?1:S.flags.ash
+    msg=S.flags.torch?"Crack strips the torch.":"Crack snuffs the torch."
+  }
+  if(r=="g"&&S.flags.crown&&S.flags.key){
+    if(S.level<5)return startCamp(S.level+1)
+    if(S.level==5)return startFinale()
+    return win()
+  }
+  if(r=="b"&&!S.flags.torch)showHint("torch")
+  if(r=="c")showHint("crack")
+  if(r=="e")showHint("beast")
+  setMsg(msg||roomMsg(r))
+}
+
+function pitSafe(x,y){
+  if(S.flags.relic=="greave")return 1
+  if(S.flags.torch)return 1
+  for(const d of [[1,0],[-1,0],[0,1],[0,-1]])if(tile(x+d[0],y+d[1])=="#")return 1
+  return 0
+}
+
+function touch(t,x,y){
+  if(t=="O"&&!pitSafe(x,y))return die("You step into the dark and do not find the edge.")
+  if(S.r=="e"&&x==S.beast.x&&y==S.beast.y)return die("The beast tears you open.")
+  if(S.drop&&S.drop.r==S.r&&S.drop.x==x&&S.drop.y==y&&S.drop.fuel){S.flags.torch=S.drop.fuel;S.drop=null;S.flags.ash=0;return setMsg("Recover the torch.")}
+  if(t=="T"&&!S.flags.torch){S.flags.torch=FUEL;S.flags.ash=0;showHint("torch");setMsg("Take the torch.")}
+  if(t=="M"&&!S.flags.mask){S.flags.mask=1;setMsg("Take the funeral mask. Dark eases, but flame stops slowing the beast.")} 
+  if(t=="S"){
+    const wardBase=S.level>=3?8:4
+    const wardGain=(hasMod("grace")?2:0)+(S.flags.relic=="eye"?1:0)+(S.flags.relic=="chain"?2+S.flags.relicPlus:0)-(S.flags.relic=="veil")
+    S.flags.ward=Math.max(S.flags.ward,wardBase+wardGain)
+    if(S.flags.relic=="ash"&&S.flags.torch){S.flags.torch=Math.max(0,S.flags.torch-1);if(!S.flags.torch)S.flags.ash=1}
+    S.path.shrines++
+    showHint("ward")
+    setMsg(S.level>=3?"Raise a ward. Flame will feed it.":"Raise a ward. It will hold for a while.")
+  }
+  if(t=="r"){
+    const o=overAt(S.r,x,y,"relics")
+    if(o){
+      S.flags.relic=o.id;S.flags.relicPlus=0;S.path.relics++;o.on=0;S.fx="relic"
+      setMsg(`Claim ${RELICS[o.id].name}. Gain ${RELICS[o.id].up}; lose ${RELICS[o.id].down}.${S.path.relics==1?` Title: ${buildTitle()}.`:""}`)
+    }
+  }
+  if(t=="F"){
+    const cap=FUEL+(S.flags.relic=="wick"?4:0)
+    const fill=S.flags.relic=="ash"?10:S.flags.relic=="wick"?8:6
+    const gain=S.flags.relic=="ash"?6:4
+    if(S.flags.ash||!S.flags.torch){S.flags.torch=fill;S.flags.ash=0;setMsg("Light the torch from the brazier.")}
+    else if(S.flags.torch<cap+(S.flags.relic=="ash"?2:0)){S.flags.torch=Math.min(cap+(S.flags.relic=="ash"?2:0),S.flags.torch+gain);setMsg("Feed the torch at the brazier.")}
+    else setMsg("Leave the brazier. The torch is full.")
+  }
+  if(t=="x"){S.fx="hit";setMsg("Trigger the crack underfoot.");burnTorch();beastTurn();if(!S.alive)return}
+  if(t=="z"){
+    S.dread=Math.min(8,S.dread+(S.flags.relic=="brand"?3:S.flags.relic=="salt"?1:2))
+    if(S.flags.ward)loseWard(1)
+    if(S.flags.torch&&S.flags.relic=="brand"){S.flags.torch=Math.max(0,S.flags.torch-1);if(!S.flags.torch)S.flags.ash=1}
+    S.fx="hit"
+    setMsg("Wake the curse. Dread rises.")
+  }
+  if(t=="n"){
+    const o=overAt(S.r,x,y,"shades")
+    if(o)o.on=0
+    S.path.shades++
+    if(S.flags.relic=="brand"){S.flags.ward=Math.min(9,S.flags.ward+2);setMsg("Break the shade and steal its spite.");return}
+    S.dread=Math.min(8,S.dread+2)
+    if(S.flags.torch){S.flags.torch=Math.max(0,S.flags.torch-(S.flags.relic=="salt"?3:2));if(!S.flags.torch)S.flags.ash=1}
+    if(S.r=="e")S.chase+=2
+    S.fx="hit"
+    setMsg("Take the shade's chill. Beast pressure rises.")
+  }
+  if(t=="q"){
+    const o=overAt(S.r,x,y,"watchers")
+    if(o)o.on=0
+    S.path.watchers++
+    S.dread=Math.min(8,S.dread+(S.flags.relic=="salt"?0:1))
+    S.chase+=S.level>=4?3:2
+    if(S.flags.torch&&S.flags.relic!="salt"){S.flags.torch=Math.max(0,S.flags.torch-1);if(!S.flags.torch)S.flags.ash=1}
+    S.fx="hit"
+    setMsg("Wake a watcher. Beast pressure rises.")
+  }
+  if(t=="l"){
+    const o=overAt(S.r,x,y,"leeches")
+    if(o)o.on=0
+    S.path.leeches++
+    if(S.flags.ward)loseWard(S.flags.relic=="chain"?1:2)
+    if(S.flags.torch){S.flags.torch=Math.max(0,S.flags.torch-1);if(!S.flags.torch)S.flags.ash=1}
+    if(S.flags.gold)S.dread=Math.min(8,S.dread+1)
+    S.fx="hit"
+    setMsg("Feed the leech ward and flame.")
+  }
+  if((S.r=="i"&&!S.flags.idol&&(t=="I"||t=="g"||t=="S"))||(S.flags.relic=="eye"&&S.r=="i"&&!S.flags.idol)){S.flags.idol=1;if(S.level==3&&S.flags.ward)S.flags.ward=Math.min(9,S.flags.ward+2);setMsg("Bow to the idol.")}
+  if(t=="g"){S.flags.gold=1;if(!S.msg)setMsg("Take the gold. Beast pressure rises.")} 
+  if(t=="C"){
+    if(!S.flags.idol)return die("You reach for the crown unbowed. The idol judges you.")
+    S.flags.crown=1
+    S.flags.gold=1
+    if(S.level==3&&S.flags.ward)loseWard(2)
+    if(S.flags.relic=="eye"){S.flags.torch=Math.max(0,S.flags.torch-3);if(!S.flags.torch)S.flags.ash=1}
+    S.crownTurn=S.turn
+    S.fx="hit"
+    setMsg("Lift the crown. The ruin wakes hungry.")
+  }
+  if(t=="K"&&!S.flags.key){S.flags.key=1;setMsg(S.flags.crown?"Take the key. Run for the gate.":"Take the key. The crown still waits.")}
+}
+
+function step(dx,dy){
+  if(S.gameState!="play")return
+  S.msg="";S.hint=""
+  const px=S.x,py=S.y
+  const nx=S.x+dx,ny=S.y+dy,t=tile(nx,ny)
+  if(t=="#")return setMsg(roomMsg())
+  S.turn++
+  if(shadow()){setMsg("Darkness twists the room around you.");beastTurn();return}
+  const ex=R[S.r].ex[t]
+  if(ex){burnTorch();return enter(ex)}
+  S.x=nx;S.y=ny
+  if(px!=S.x||py!=S.y){S.fx="move";S.intro=0}
+  touch(t,nx,ny)
+  if(!S.alive||S.win)return
+  burnTorch()
+  beastTurn()
+  if(!S.alive||S.win)return
+  if(!S.msg)setMsg(roomMsg())
+}
+
+function wait(){
+  if(S.gameState!="play")return
+  S.hint=""
+  S.turn++
+  S.fx=""
+  if(shadow())S.msg="Freeze as dark closes in."
+  else S.msg="Wait one breath."
+  burnTorch()
+  beastTurn()
+  if(!S.alive||S.win)return
+}
+
+function jumpLevel(level=2){
+  startRun(S&&S.mode||"standard",0)
+  while(S.level<level)enterLevel(S.level+1)
+  render()
+}
+
+function key(e){
+  if(S.gameState=="title"){
+    if("12345".includes(e.key)){startRun(MODE_IDS[+e.key-1],1);render();return}
+    if(e.key=="r"){startRun("standard",1);render();return}
+  }
+  if(e.key=="r"){reset(1);render();return}
+  if(e.key=="R"){startRun(S&&S.mode||"standard",0);render();return}
+  if(e.key=="v"){DBG.show=!DBG.show;render();return}
+  if(e.key=="V"){DBG.out=validateSeeds();render();return}
+  if(e.key=="j"){jumpLevel(2);return}
+  if(e.key=="J"){jumpLevel(3);return}
+  if(e.key=="k"){jumpLevel(4);return}
+  if(e.key=="K"){jumpLevel(5);return}
+  if(S.gameState=="camp"){
+    if("1234".includes(e.key))applyCampChoice(e.key)
+    render()
+    return
+  }
+  if(S.gameState!="play"){render();return}
+  if(e.key=="n"){reset(1);render();return}
+  if(e.key=="t"){dropTorch();render();return}
+  if(e.key=="ArrowUp"||e.key=="w")step(0,-1)
+  if(e.key=="ArrowDown"||e.key=="s")step(0,1)
+  if(e.key=="ArrowLeft"||e.key=="a")step(-1,0)
+  if(e.key=="ArrowRight"||e.key=="d")step(1,0)
+  if(e.key==" "||e.key==".")wait()
+  render()
+}
+addEventListener("keydown",key)
+X.onclick=()=>{reset(1);render()}
+
+function draw(x,y){
+  const vis=visible(x,y),mem=seen(x,y)
+  if(!vis&&!mem)return ""
+  const t=tile(x,y)
+  return tileGlyph(t,x,y,vis)
+}
+
+function cls(x,y){
+  const vis=visible(x,y),mem=seen(x,y)
+  if(!vis&&!mem)return "u"
+  if(vis&&x==S.x&&y==S.y)return `p ${fogClass(x,y,vis,mem)} ${S.fx=="move"?"pm":""} ${S.flags.ward&&S.flags.ward<4?"warded":""}`.trim()
+  if(vis&&S.r=="e"&&x==S.beast.x&&y==S.beast.y)return `B ${fogClass(x,y,vis,mem)} ${S.fx=="beast"?"bm":""} ${beastState()}`.trim()
+  const t=tile(x,y),state=fogClass(x,y,vis,mem),near=S.flags.ward&&vis&&Math.abs(x-S.x)+Math.abs(y-S.y)<=1,kind=t=="#"?"w":t=="O"?"o":t=="."?"f":t==">"?"i":t
+  return `${kind} ${state} ${"Ozxnql".includes(t)?"haz":""} ${t=="T"?"drop":""} ${t=="S"||near?"warded":""} ${t=="S"&&S.flags.ward&&S.flags.ward<4?"stress":""}`.trim()
+}
+
+function render(){
+  U.className=S.gameState
+  SEl.dataset.state=S.gameState
+  SEl.dataset.floor=S.level||1
+  SEl.dataset.mode=S.mode||"standard"
+  if(S.gameState=="title"){
+    delete G.dataset.intro
+    U.innerHTML=`1MB ROGUELIKE<small>single-file campaign | minimalist descent</small>`
+    I.textContent=`modes\n1  standard  ${MODES.standard.desc}\n2  iron      ${MODES.iron.desc}\n3  greed     ${MODES.greed.desc}\n4  dark      ${MODES.dark.desc}\n5  daily     ${MODES.daily.desc}\n\nkeys\n1-5 begin\nr   quick run\n\nglyphs\n@ you      B beast    * relic\nY shrine   & brazier  t torch\n! crack    ^ curse    Q watcher\nj leech    $ gold     > gate`
+    L.textContent="Pick a mode, then descend. Flame buys time; wards buy mistakes."
+    X.textContent="start standard"
+    X.onclick=()=>{startRun("standard",1);render()}
+    X.hidden=false
+    G.className="splash shift"
+    G.textContent=splash("1MB ROGUELIKE","single-file campaign",[
+      "descend through six authored floors",
+      "carry light, ward, and stolen momentum",
+      "every room is text, timing, and pressure"
+    ],"press 1-5 or use the button below")
+    return
+  }
+  if(S.gameState=="camp"){
+    delete G.dataset.intro
+    const next=floorTheme(S.camp.next)
+    U.innerHTML=`CAMP<small>${buildTitle()} | floor ${S.level} to ${S.camp.next} | ${next.tag}</small>`
+    X.textContent="restart"
+    X.onclick=()=>{reset(1);render()}
+    I.textContent=`camp\n${statRow("title",buildTitle())}\n${statRow("next",`floor ${S.camp.next} ${next.name}`)}\n${statRow("accent",next.accent)}\n${statRow("fog",next.fog)}\n${statRow("mods",modSummary())}\n${statRow("relic",S.flags.relic?RELICS[S.flags.relic].name+(S.flags.relicPlus?` +${S.flags.relicPlus}`:""):"none")}\n\n1 temper current\n2 take ${RELICS[S.camp.offer[0]].label}\n3 take ${RELICS[S.camp.offer[1]].label}\n4 sacrifice`
+    L.textContent=`${S.endLead}\nTitle: ${buildTitle()}. Temper for consistency, trade for a pivot, or sacrifice for supplies.`
+    X.hidden=false
+    G.className="splash shift"
+    G.textContent=splash("CAMP","the ruin loosens its grip for one room",[
+      `next floor: ${S.camp.next} ${next.name}`,
+      `title     : ${buildTitle()}`,
+      `accent    : ${next.accent}`,
+      `fog       : ${next.fog}`,
+      `offer     : ${RELICS[S.camp.offer[0]].name}`,
+      `offer     : ${RELICS[S.camp.offer[1]].name}`
+    ],"press 1-4 to choose")
+    return
+  }
+  if(S.gameState=="play"){
+    remember()
+    const th=floorTheme()
+    U.innerHTML=`floor ${S.level} | ${th.name}<small>${buildTitle()} | ${th.tag} | ${th.accent} | ${MODES[S.mode||"standard"].label} | seed ${S.seed.toString(36)}</small>`
+    I.textContent=sidePanel()+(DBG.show?`\n\ndebug\n${variantSummary()}\nsolve  : ${escapeSolve(S.level,V.escape,V.beast,S.level>=3?8:6)?"ok":"fail"}${DBG.out?`\ncheck  : ${DBG.out}`:""}\nkeys   : v V R j J k K`:"")
+    L.textContent=[S.msg,S.hint,roomMsg()].filter(Boolean).join("\n")
+    X.onclick=()=>{reset(1);render()}
+    X.hidden=true
+    if(S.intro)G.dataset.intro=INTRO_TEXT
+    else delete G.dataset.intro
+    G.innerHTML=""
+    G.className=S.fx=="hit"?"hit":S.fx=="win"?"win":S.fx=="shift"?"shift":""
+    if(S.fx=="ward")G.className="ward"
+    if(S.fx=="relic")G.className="relic"
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+      const d=document.createElement("div")
+      d.className="t "+cls(x,y)
+      d.textContent=draw(x,y)
+      G.appendChild(d)
+    }
+    S.fx=""
+    return
+  }
+  const done=S.gameState=="dead",th=floorTheme()
+  delete G.dataset.intro
+  U.innerHTML=`${done?"DEAD":"ESCAPED"}<small>${done?S.deathCause:buildTitle()} | floor ${S.level} ${th.name} | seed ${S.seed.toString(36)}</small>`
+  X.textContent="restart"
+  X.onclick=()=>{reset(1);render()}
+  G.className=`splash ${S.gameState=="win"?"win":"hit"}`
+  G.textContent=splash(done?"RUN ENDED":"DAWN","the descent leaves a shape behind",[
+    `title : ${buildTitle()}`,
+    `route : ${runStyle().route}`,
+    `state : ${done?"broken":"survived"}`,
+    `floor : ${S.level} ${th.name}`,
+    `mods  : ${modSummary()}`
+  ],done?"press restart to descend again":"the gate opens and the run resolves")
+  I.textContent=`summary\n${endStats()}${DBG.show?`\n\ndebug\n${variantSummary()}${DBG.out?`\ncheck: ${DBG.out}`:""}`:""}`
+  L.textContent=`${S.endLead}\n${done?"The ruin keeps the rest.":"The run closes cleanly at the gate."}`
+  X.hidden=false
+}
+render()
+</script>
