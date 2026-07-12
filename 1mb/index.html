@@ -81,7 +81,7 @@ const SFX={
     if(s)this.beep(s.freq,s.dur,s.type)
   }
 }
-let seed=0,B0=[10,8],R,S,V={hall:0,pit:0,idol:0,crack:0,escape:0,beast:0},DBG={show:0,out:""},O={relics:[],curses:[],shades:[],blocks:[],braziers:[],shrines:[],watchers:[],leeches:[],effigies:[]}
+let seed=0,B0=[10,8],R,S,V={hall:0,pit:0,idol:0,crack:0,escape:0,beast:0},DBG={show:0,out:""},O={relics:[],curses:[],shades:[],blocks:[],braziers:[],shrines:[],watchers:[],leeches:[],effigies:[]},hasSave=0
 
 function rng(n){
   return function(){
@@ -184,6 +184,7 @@ function finaleName(){
 function openTitle(){
   seed=0
   S={gameState:"title",mode:"standard",currentMode:"standard",alive:1,win:0,level:1,currentLevel:1,msg:"",endLead:"",deathCause:"",mods:[],flags:{},path:{},seen:{},turn:0}
+  hasSave=!!loadSave()
 }
 function startRun(mode="standard",fresh=1){
   const dailySeed=hash(new Date().toISOString().slice(0,10))
@@ -225,6 +226,28 @@ function startCamp(next){
   S.endTitle=`camp | floor ${S.level} cleared`
   S.endLead=`Between floors, you can temper or trade your relic before Level ${next} (${LEVEL_ARCS[next]}).`
   S.fx="shift"
+  saveGame()
+}
+
+function saveGame(){
+  if(S.gameState!="camp")return
+  try{localStorage.setItem("mrl_save",JSON.stringify({v:1,S}))}catch(e){}
+}
+function loadSave(){
+  try{const raw=localStorage.getItem("mrl_save");return raw?JSON.parse(raw):null}catch(e){return null}
+}
+function clearSave(){
+  try{localStorage.removeItem("mrl_save")}catch(e){}
+}
+function continueSave(){
+  const save=loadSave()
+  if(!save)return
+  S=save.S
+  seed=S.seed
+  build(seed)
+  S.gameState="camp"
+  hasSave=!!loadSave()
+  render()
 }
 
 function startFinale(){
@@ -305,8 +328,8 @@ function tile(x,y,r=S.r){
   return base(x,y,r)
 }
 function setMsg(msg){S.msg=msg}
-function die(msg,cause=msg){S.alive=0;S.gameState="dead";S.deathCause=cause;S.endTitle="dead";S.endLead=msg;S.fx="hit";setMsg(msg);S.end=summary()}
-function win(){S.win=1;S.gameState="win";S.endTitle="dawn";S.endLead="You escape alive.";S.fx="win";setMsg("Dawn spills through the gate. You escape alive.");S.end=summary()}
+function die(msg,cause=msg){S.alive=0;S.gameState="dead";S.deathCause=cause;S.endTitle="dead";S.endLead=msg;S.fx="hit";setMsg(msg);S.end=summary();clearSave();hasSave=!1}
+function win(){S.win=1;S.gameState="win";S.endTitle="dawn";S.endLead="You escape alive.";S.fx="win";setMsg("Dawn spills through the gate. You escape alive.");S.end=summary();clearSave();hasSave=!1}
 function sign(n){return n<0?-1:n>0?1:0}
 function dist(ax,ay,bx,by){return Math.abs(ax-bx)+Math.abs(ay-by)}
 function dark(r=S.r){return LEVELS[S.level].dark.includes(r)}
@@ -782,6 +805,7 @@ function key(e){
   if(S.gameState=="title"){
     if("12345".includes(e.key)){startRun(MODE_IDS[+e.key-1],1);render();return}
     if(e.key=="r"){startRun("standard",1);render();return}
+    if(e.key=="c"&&hasSave){continueSave();return}
   }
   if(e.key=="r"){reset(1);render();return}
   if(e.key=="R"){startRun(S&&S.mode||"standard",0);render();return}
@@ -834,8 +858,8 @@ function render(){
   if(S.gameState=="title"){
     delete G.dataset.intro
     U.innerHTML=`1MB ROGUELIKE<small>single-file campaign | minimalist descent</small>`
-    I.textContent=`modes\n1  standard  ${MODES.standard.desc}\n2  iron      ${MODES.iron.desc}\n3  greed     ${MODES.greed.desc}\n4  dark      ${MODES.dark.desc}\n5  daily     ${MODES.daily.desc}\n\nkeys\n1-5 begin\nr   quick run\n\nglyphs\n@ you      B beast    * relic\nY shrine   & brazier  t torch\n! crack    ^ curse    Q watcher\nj leech    $ gold     > gate`
-    L.textContent="Pick a mode, then descend. Flame buys time; wards buy mistakes."
+    I.textContent=`modes\n1  standard  ${MODES.standard.desc}\n2  iron      ${MODES.iron.desc}\n3  greed     ${MODES.greed.desc}\n4  dark      ${MODES.dark.desc}\n5  daily     ${MODES.daily.desc}\n\nkeys\n1-5 begin\nr   quick run${hasSave?"\nc   continue saved run":""}\nm   mute sound\n\nglyphs\n@ you      B beast    * relic\nY shrine   & brazier  t torch\n! crack    ^ curse    Q watcher\nj leech    $ gold     > gate`
+    L.textContent=`Pick a mode, then descend. Flame buys time; wards buy mistakes.${hasSave?" A saved run is waiting — press c to continue.":""}`
     X.textContent="start standard"
     X.onclick=()=>{startRun("standard",1);render()}
     X.hidden=false
