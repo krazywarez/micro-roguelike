@@ -62,6 +62,25 @@ linear-gradient(180deg,transparent,rgba(0,0,0,.12));mix-blend-mode:screen;opacit
 <script src=data.js></script>
 <script>
 const SEl=document.getElementById("s"),U=document.getElementById("u"),G=document.getElementById("g"),I=document.getElementById("i"),L=document.getElementById("l"),X=document.getElementById("r"),D=document.getElementById("d")
+let muted=0
+const SFX={
+  ctx:null,
+  beep(freq,dur,type){
+    if(muted||!freq)return
+    if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)()
+    if(this.ctx.state=="suspended")this.ctx.resume()
+    const osc=this.ctx.createOscillator(),gain=this.ctx.createGain()
+    osc.type=type;osc.frequency.value=freq
+    gain.gain.setValueAtTime(.15,this.ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(.0001,this.ctx.currentTime+dur)
+    osc.connect(gain);gain.connect(this.ctx.destination)
+    osc.start();osc.stop(this.ctx.currentTime+dur)
+  },
+  play(fx){
+    const s=SFX_MAP[fx]
+    if(s)this.beep(s.freq,s.dur,s.type)
+  }
+}
 let seed=0,B0=[10,8],R,S,V={hall:0,pit:0,idol:0,crack:0,escape:0,beast:0},DBG={show:0,out:""},O={relics:[],curses:[],shades:[],blocks:[],braziers:[],shrines:[],watchers:[],leeches:[],effigies:[]}
 
 function rng(n){
@@ -759,6 +778,7 @@ function jumpLevel(level=2){
 }
 
 function key(e){
+  if(e.key=="m"){muted=!muted;render();return}
   if(S.gameState=="title"){
     if("12345".includes(e.key)){startRun(MODE_IDS[+e.key-1],1);render();return}
     if(e.key=="r"){startRun("standard",1);render();return}
@@ -867,6 +887,7 @@ function render(){
       d.textContent=draw(x,y)
       G.appendChild(d)
     }
+    SFX.play(S.fx)
     S.fx=""
     return
   }
@@ -876,6 +897,7 @@ function render(){
   X.textContent="restart"
   X.onclick=()=>{reset(1);render()}
   G.className=`splash ${S.gameState=="win"?"win":"hit"}`
+  SFX.play(done?"dead":"win")
   G.textContent=splash(done?"RUN ENDED":"DAWN","the descent leaves a shape behind",[
     `title : ${buildTitle()}`,
     `route : ${runStyle().route}`,

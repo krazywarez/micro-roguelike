@@ -999,6 +999,15 @@ const CURSE_TEXT=[
   "A mean seam in the floor wakes underfoot.",
   "The room answers touch with dread."
 ]
+const SFX_MAP={
+ hit:{freq:180,dur:.08,type:"square"},
+ beast:{freq:90,dur:.12,type:"sawtooth"},
+ win:{freq:660,dur:.4,type:"sine"},
+ relic:{freq:520,dur:.15,type:"triangle"},
+ ward:{freq:340,dur:.2,type:"sine"},
+ shift:{freq:220,dur:.1,type:"sine"},
+ dead:{freq:70,dur:.5,type:"sawtooth"}
+}
 const FINALE_NAMES=["Ash Gate","Gold Gate","Hush Gate","Ward Gate"]
 const INTRO_TEXT=["Move with arrows or WASD.","Carry flame. Bow for gold.","Wards hold. Cracks strip. The beast reads haste."].join("\n")
 const HINT_TEXT={
