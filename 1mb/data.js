@@ -950,7 +950,10 @@ const MODES={
  iron:{label:"iron",desc:"early beast"},
  greed:{label:"greed",desc:"hot relics, costly gold"},
  dark:{label:"dark",desc:"weak flame, fast dread"},
- daily:{label:"daily",desc:"fixed daily seed"}
+ daily:{label:"daily",desc:"fixed daily seed"},
+ heavy:{label:"heavy torch",desc:"starts lit, more fuel"},
+ swift:{label:"swift",desc:"pits never catch you"},
+ warded:{label:"warded",desc:"starts warded, wards hold longer"}
 }
 const MODE_IDS=Object.keys(MODES)
 const MODS={

@@ -108,6 +108,7 @@ function modeMods(mode){
   if(mode=="iron")return ["wake"]
   if(mode=="greed")return ["rich"]
   if(mode=="dark")return ["thin","gloom"]
+  if(mode=="warded")return ["grace"]
   return []
 }
 function hasMod(id){return S.mods&&S.mods.includes(id)}
@@ -194,7 +195,7 @@ function startRun(mode="standard",fresh=1){
   S={level:1,currentLevel:1,mode,currentMode:mode}
   S.mods=mods
   build(seed)
-  S={seed,mode,currentMode:mode,mods:S.mods,level:1,currentLevel:1,gameState:"play",deathCause:"",endTitle:"",endLead:"",fx:"shift",r:"g",x:P.g[0],y:P.g[1],alive:1,win:0,turn:0,crownTurn:-1,chase:0,dread:0,msg:`Begin floor 1. ${floorLine(1)}`,hint:"",intro:1,hints:{torch:0,ward:0,crack:0,beast:0},flags:{idol:0,gold:mode=="greed",torch:0,ash:0,crown:0,key:0,mask:0,ward:0,relic:"",relicPlus:0},beast:{x:B0[0],y:B0[1]},drop:null,path:{pit:0,crack:0,drops:0,shrines:0,relics:0,shades:0,watchers:0,leeches:0,camps:0,levels:1,finale:0},camp:null,seen:{},end:"",finaleName:""}
+  S={seed,mode,currentMode:mode,mods:S.mods,level:1,currentLevel:1,gameState:"play",deathCause:"",endTitle:"",endLead:"",fx:"shift",r:"g",x:P.g[0],y:P.g[1],alive:1,win:0,turn:0,crownTurn:-1,chase:0,dread:0,msg:`Begin floor 1. ${floorLine(1)}`,hint:"",intro:1,hints:{torch:0,ward:0,crack:0,beast:0},flags:{idol:0,gold:mode=="greed",torch:mode=="heavy"?FUEL+8:0,ash:0,crown:0,key:0,mask:0,ward:mode=="warded"?4:0,relic:"",relicPlus:0},beast:{x:B0[0],y:B0[1]},drop:null,path:{pit:0,crack:0,drops:0,shrines:0,relics:0,shades:0,watchers:0,leeches:0,camps:0,levels:1,finale:0},camp:null,seen:{},end:"",finaleName:""}
 }
 function reset(fresh){
   if(fresh)openTitle()
@@ -685,6 +686,7 @@ function enter(r,x=P[r][0],y=P[r][1],msg){
 
 function pitSafe(x,y){
   if(S.flags.relic=="greave")return 1
+  if(S.mode=="swift")return 1
   if(S.flags.torch)return 1
   for(const d of [[1,0],[-1,0],[0,1],[0,-1]])if(tile(x+d[0],y+d[1])=="#")return 1
   return 0
@@ -821,7 +823,7 @@ function key(e){
   if(e.key=="m"){muted=!muted;render();return}
   if(S.gameState=="win"&&(e.key=="p"||e.key=="7")){startPostgame();render();return}
   if(S.gameState=="title"){
-    if("12345".includes(e.key)){startRun(MODE_IDS[+e.key-1],1);render();return}
+    if("12345678".includes(e.key)){startRun(MODE_IDS[+e.key-1],1);render();return}
     if(e.key=="r"){startRun("standard",1);render();return}
     if(e.key=="c"&&hasSave){continueSave();return}
   }
@@ -876,7 +878,7 @@ function render(){
   if(S.gameState=="title"){
     delete G.dataset.intro
     U.innerHTML=`1MB ROGUELIKE<small>single-file campaign | minimalist descent</small>`
-    I.textContent=`modes\n1  standard  ${MODES.standard.desc}\n2  iron      ${MODES.iron.desc}\n3  greed     ${MODES.greed.desc}\n4  dark      ${MODES.dark.desc}\n5  daily     ${MODES.daily.desc}\n\nkeys\n1-5 begin\nr   quick run${hasSave?"\nc   continue saved run":""}\nm   mute sound\n\nglyphs\n@ you      B beast    * relic\nY shrine   & brazier  t torch\n! crack    ^ curse    Q watcher\nj leech    $ gold     > gate`
+    I.textContent=`modes\n1  standard  ${MODES.standard.desc}\n2  iron      ${MODES.iron.desc}\n3  greed     ${MODES.greed.desc}\n4  dark      ${MODES.dark.desc}\n5  daily     ${MODES.daily.desc}\n6  heavy     ${MODES.heavy.desc}\n7  swift     ${MODES.swift.desc}\n8  warded    ${MODES.warded.desc}\n\nkeys\n1-8 begin\nr   quick run${hasSave?"\nc   continue saved run":""}\nm   mute sound\n\nglyphs\n@ you      B beast    * relic\nY shrine   & brazier  t torch\n! crack    ^ curse    Q watcher\nj leech    $ gold     > gate`
     L.textContent=`Pick a mode, then descend. Flame buys time; wards buy mistakes.${hasSave?" A saved run is waiting — press c to continue.":""}`
     X.textContent="start standard"
     X.onclick=()=>{startRun("standard",1);render()}
