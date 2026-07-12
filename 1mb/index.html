@@ -1,4 +1,4 @@
-<!doctype html><meta charset=utf-8><title>1MB Roguelike v1</title>
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>1MB Roguelike v1</title>
 <style>
 :root{color-scheme:dark}
 body{margin:0;min-width:100vw;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#020403;color:#dbe8d7;font:14px/1.3 monospace}
@@ -22,6 +22,9 @@ linear-gradient(180deg,transparent,rgba(0,0,0,.12));mix-blend-mode:screen;opacit
 #i{flex:0 1 auto;width:min(calc(35ch + 26px),100%);min-width:calc(35ch + 26px);max-width:100%;min-height:230px;padding:11px 13px;border:1px solid color-mix(in srgb,var(--panelEdge) 74%,#5b6a60);background:linear-gradient(180deg,var(--panel),#050805f2);color:var(--text);line-height:1.42;white-space:pre-line;text-align:left;box-shadow:inset 0 0 0 1px #000,0 0 18px #0006;overflow-wrap:break-word}
 #l{min-height:38px;width:min(100%,860px);padding:9px 16px;border:1px solid color-mix(in srgb,var(--panelEdge) 72%,#5b6a60);background:linear-gradient(180deg,#0a110dcd,#050805ec);color:var(--muted);white-space:pre-line;text-align:center;box-shadow:inset 0 0 0 1px #000}
 #r{margin-top:8px;padding:8px 14px;border:1px solid color-mix(in srgb,var(--accent) 70%,#6e7c73);background:linear-gradient(180deg,#09110b,#030503);color:var(--accent);font:inherit;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:0 0 14px #0007}
+#d{display:none;margin-top:8px;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px);gap:6px}
+#d button{font:16px/1 inherit;border:1px solid color-mix(in srgb,var(--accent) 70%,#6e7c73);background:linear-gradient(180deg,#09110b,#030503);color:var(--accent);cursor:pointer;box-shadow:0 0 14px #0007;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+#d .pu{grid-column:2;grid-row:1}#d .pl{grid-column:1;grid-row:2}#d .pw{grid-column:2;grid-row:2}#d .pr{grid-column:3;grid-row:2}#d .pd{grid-column:2;grid-row:3}
 .t{position:relative;width:16px;height:16px;display:flex;align-items:center;justify-content:center;transition:transform .08s,color .12s,opacity .12s,filter .12s,text-shadow .12s,background .12s}
 .v{opacity:1;filter:saturate(1)}.m{opacity:.44;filter:saturate(.42) brightness(.78)}.u{opacity:0}
 .far{opacity:.58}.mid{opacity:.8}
@@ -48,16 +51,17 @@ linear-gradient(180deg,transparent,rgba(0,0,0,.12));mix-blend-mode:screen;opacit
 #s[data-state="dead"]{--accent:#ff8b79;--panelEdge:#6b2f27;--gridEdge:#612b24;--mist:#ff715812}
 #s[data-state="win"]{--accent:#f3dd8f;--panelEdge:#7a6930;--gridEdge:#6e5f2c;--mist:#f3dd8f18}
 #s[data-state="camp"]{--accent:#c8f2dd;--panelEdge:#376050;--gridEdge:#2f5648;--mist:#8ff0cc18}
-@media (max-width:780px){#s{justify-content:flex-start;padding:12px 10px 20px}#p{flex-direction:column;align-items:center;width:100%}#g,#i,#g.splash,#l,#u{width:min(92vw,420px);max-width:100%}#i,#g.splash{min-width:0}#g.splash{overflow:auto}}
+@media (max-width:780px){#s{justify-content:flex-start;padding:12px 10px 20px}#p{flex-direction:column;align-items:center;width:100%}#g,#i,#g.splash,#l,#u{width:min(92vw,420px);max-width:100%}#i,#g.splash{min-width:0}#g.splash{overflow:auto}#s[data-state="play"] #d{display:grid}}
 @keyframes flicker{0%,100%{opacity:1;transform:translateY(0)}25%{opacity:.75;transform:translateY(-.5px)}50%{opacity:.94}75%{opacity:.68;transform:translateY(.5px)}}
 @keyframes pulse{0%,100%{opacity:.84;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
 @keyframes step{0%{transform:scale(.82)}100%{transform:scale(1)}}
 @keyframes wardbreak{0%{filter:brightness(1.35)}100%{filter:brightness(1)}}
 @keyframes relicpulse{0%{transform:scale(1)}50%{transform:scale(1.035)}100%{transform:scale(1)}}
 </style>
-<div id=s><div id=u></div><div id=p><div id=g></div><div id=i></div></div><div id=l></div><button id=r hidden>restart</button></div>
+<div id=s><div id=u></div><div id=p><div id=g></div><div id=i></div></div><div id=l></div><div id=d><button data-k=ArrowUp class=pu>^</button><button data-k=ArrowLeft class=pl>&lt;</button><button data-k=. class=pw>*</button><button data-k=ArrowRight class=pr>&gt;</button><button data-k=ArrowDown class=pd>v</button></div><button id=r hidden>restart</button></div>
 <script>
 const W=12,H=12,FUEL=16
+const BEAST_CALM_RADIUS=4,BEAST_ENRAGED_SPEED=2,TORCH_DRAIN_BASE=1,TORCH_DRAIN_HAZARD=2,RELIC_SLOTS_LOW=2,RELIC_SLOTS_MID=3,RELIC_SLOTS_HIGH=4,RELIC_SLOTS_RICH_BONUS=1
 const P={g:[5,2],b:[2,2],e:[2,9],h:[2,9],p:[2,2],i:[2,2],c:[2,2],v:[2,2],d:[2,2]}
 const PITS=[[
 "############",
@@ -1276,7 +1280,7 @@ v:{m:[
 d:BASE.d
 }
 const BASES={1:BASE,2:BASE2,3:BASE3,4:BASE3,5:BASE3,6:BASE3}
-const SEl=document.getElementById("s"),U=document.getElementById("u"),G=document.getElementById("g"),I=document.getElementById("i"),L=document.getElementById("l"),X=document.getElementById("r")
+const SEl=document.getElementById("s"),U=document.getElementById("u"),G=document.getElementById("g"),I=document.getElementById("i"),L=document.getElementById("l"),X=document.getElementById("r"),D=document.getElementById("d")
 let seed=0,B0=[10,8],R,S,V={hall:0,pit:0,idol:0,crack:0,escape:0,beast:0},DBG={show:0,out:""},O={relics:[],curses:[],shades:[],blocks:[],braziers:[],shrines:[],watchers:[],leeches:[]}
 
 function rng(n){
@@ -1332,7 +1336,7 @@ function build(seed0){
   B0=L.beasts[V.beast]
   const relicBag=RELIC_IDS.slice().sort(()=>r()-.5)
   const level=S&&S.level||1
-  O={relics:pickSpots(r,RELIC_SPOTS[level]||[],(level>=5?4:level>=3?3:2)+(S&&S.mods&&S.mods.includes("rich")?1:0)).map((v,i)=>({r:v[0],x:v[1],y:v[2],id:relicBag[i%relicBag.length],on:1})),
+  O={relics:pickSpots(r,RELIC_SPOTS[level]||[],(level>=5?RELIC_SLOTS_HIGH:level>=3?RELIC_SLOTS_MID:RELIC_SLOTS_LOW)+(S&&S.mods&&S.mods.includes("rich")?RELIC_SLOTS_RICH_BONUS:0)).map((v,i)=>({r:v[0],x:v[1],y:v[2],id:relicBag[i%relicBag.length],on:1})),
     braziers:pickSpots(r,BRAZIER_SPOTS[level]||[],level>=5?3:level>=3?2:1).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
     shrines:pickSpots(r,SHRINE_SPOTS[level]||[],level>=4?3:level>=3?2:1).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
     curses:pickSpots(r,CURSE_SPOTS[level]||[],level==1?1:level>=5?3:2).map(v=>({r:v[0],x:v[1],y:v[2],on:1})),
@@ -1725,7 +1729,7 @@ function beastState(){
   if(S.level==3&&S.flags.ward&&S.r=="e")return "alert"
   if(S.level==3&&S.flags.ward&&S.flags.crown)return "alert"
   if(S.flags.relic=="tooth"&&S.r=="e"&&S.chase>3)return "enraged"
-  if(S.level==2&&S.r=="e"&&(!fire()||S.chase>5&&!S.drop?.fuel))return "enraged"
+  if(S.level==2&&S.r=="e"&&(!fire()||S.chase>5))return "enraged"
   if(S.level==2&&(S.r=="e"||S.flags.gold||S.flags.crown))return "alert"
   if(S.flags.crown&&!fire())return "enraged"
   if(S.flags.crown&&S.r=="e"&&S.chase>8)return "enraged"
@@ -1746,8 +1750,8 @@ function beastTurn(){
   if(s=="alert"&&carriedFire()&&S.flags.relic!="hush"&&S.flags.relic!="lure"&&!(S.chase++%2))return
   const lure=S.drop&&S.drop.r=="e"&&S.drop.fuel&&S.flags.relic!="ember"||S.flags.relic=="lure"&&S.drop&&S.drop.r=="e"&&S.drop.fuel
   const tx=lure?S.drop.x:S.x,ty=lure?S.drop.y:S.y
-  const radius=s=="calm"?4:99
-  const speed=s=="enraged"?2:1
+  const radius=s=="calm"?BEAST_CALM_RADIUS:99
+  const speed=s=="enraged"?BEAST_ENRAGED_SPEED:1
   if(dist(S.x,S.y,S.beast.x,S.beast.y)<=1)return die("The beast is on you before you can breathe.")
   if(dist(tx,ty,S.beast.x,S.beast.y)>radius)return
   const bx=S.beast.x,by=S.beast.y
@@ -1772,7 +1776,7 @@ function beastTurn(){
 function burnTorch(){
   if(!S.alive||S.win||!dark())return
   if(S.flags.torch){
-    let drain=(S.level==2||S.level>=4)&&"ec".includes(S.r)?2:1
+    let drain=(S.level==2||S.level>=4)&&"ec".includes(S.r)?TORCH_DRAIN_HAZARD:TORCH_DRAIN_BASE
     if(S.level>=3&&S.flags.ward)drain++
     if(hasMod("thin"))drain++
     if(S.flags.relic=="wick")drain++
@@ -1935,9 +1939,12 @@ function step(dx,dy){
   const nx=S.x+dx,ny=S.y+dy,t=tile(nx,ny)
   if(t=="#")return setMsg(roomMsg())
   S.turn++
-  if(shadow()){setMsg("Darkness twists the room around you.");beastTurn();return}
+  if(shadow()){setMsg("Darkness twists the room around you.");burnTorch();beastTurn();return}
   const ex=R[S.r].ex[t]
-  if(ex){burnTorch();return enter(ex)}
+  if(ex){
+    if(S.r=="e"&&nx==S.beast.x&&ny==S.beast.y)return die("The beast tears you open.")
+    burnTorch();return enter(ex)
+  }
   S.x=nx;S.y=ny
   if(px!=S.x||py!=S.y){S.fx="move";S.intro=0}
   touch(t,nx,ny)
@@ -1995,6 +2002,7 @@ function key(e){
   render()
 }
 addEventListener("keydown",key)
+D.onclick=e=>{const k=e.target.dataset.k;if(k)key({key:k})}
 X.onclick=()=>{reset(1);render()}
 
 function draw(x,y){
