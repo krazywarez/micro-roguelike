@@ -1,0 +1,7 @@
+#!/bin/sh
+# Optional git pre-commit hook: run the 1MB budget + solver gate.
+# Install (from the repo root):
+#   ln -s ../../tools/pre-commit .git/hooks/pre-commit
+set -eu
+root=$(git rev-parse --show-toplevel)
+exec "$root/tools/check.sh"

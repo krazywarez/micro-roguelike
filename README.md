@@ -50,6 +50,15 @@ From the title screen, press a number to start:
 
 Win once, and a hidden seventh floor opens up — for anyone who isn't done yet.
 
+### Budget & verification
+The whole game is the two raw files in `1mb/` — no build step, no minification, ever — and together they must stay under 1,048,576 bytes (1 MiB). `tools/check.sh` is the gate: it prints the byte ledger and proves every escape room stays winnable across hundreds of seeds (ledger history lives in [docs/SIZES.md](docs/SIZES.md)).
+
+```sh
+tools/check.sh
+```
+
+To run it automatically before each commit: `ln -s ../../tools/pre-commit .git/hooks/pre-commit`
+
 ---
 
 ## 1KB Version — the hypertext original

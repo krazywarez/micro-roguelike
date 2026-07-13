@@ -944,7 +944,7 @@ const ESCAPES6=[[
 "############"]]
 const BEASTS6=[[10,8],[10,7],[9,7],[10,6]]
 const LEVEL_ORDER=[1,2,3,4,5,6]
-const LEVEL_ARCS={1:"foundation",2:"pressure",3:"ward",4:"hunt",5:"hollow",6:"finale",7:"afterglow"}
+const LEVEL_ARCS={1:"foundation",2:"pressure",3:"ward",4:"hunt",5:"hollow",6:"finale",7:"afterglow",9:"proving ground"}
 const MODES={
  standard:{label:"standard",desc:"full campaign"},
  iron:{label:"iron",desc:"early beast"},
@@ -980,7 +980,8 @@ const FLOOR_THEMES={
  4:{name:"hunt",tag:"rose alarm",accent:"pink hunt",fog:"thin red haze"},
  5:{name:"hollow",tag:"ash hush",accent:"bone gray",fog:"dry blackout"},
  6:{name:"finale",tag:"crown weather",accent:"gold ruin",fog:"judging dark"},
- 7:{name:"afterglow",tag:"borrowed dawn",accent:"ash gold",fog:"embered haze"}
+ 7:{name:"afterglow",tag:"borrowed dawn",accent:"ash gold",fog:"embered haze"},
+ 9:{name:"proving ground",tag:"debug",accent:"bare stone",fog:"none"}
 }
 const ENEMY_TEXT={
   beast:["A one-eyed pursuer that reads space better than fear.","It wants a lane, not a duel."],
@@ -1124,10 +1125,11 @@ const LEVELS={
 4:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES4,beasts:BEASTS4,dark:"behipcv",tone:"The hunt floor listens for every sound you make."},
 5:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES5,beasts:BEASTS5,dark:"behipcv",tone:"The hollow floor strips away whatever was merely enough."},
 6:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES6,beasts:BEASTS6,dark:"behipcv",tone:"The final gate wakes. Everything left in you will be tested."},
-7:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES6,beasts:BEASTS6,dark:"behipcv",tone:"You already won. The ruin didn't agree to let you leave."}
+7:{pits:PITS4,idols:IDOLS4,cracks:CRACKS4,halls:HALLS4,escapes:ESCAPES6,beasts:BEASTS6,dark:"behipcv",tone:"You already won. The ruin didn't agree to let you leave."},
+9:{pits:PITS,idols:IDOLS,cracks:CRACKS,halls:HALLS,escapes:ESCAPES,beasts:BEASTS,dark:"",tone:"A proving ground outside the campaign."}
 }
 const BASE={
-g:{m:[
+g:[
 "############",
 "#..........#",
 "#..L.....R.#",
@@ -1139,8 +1141,8 @@ g:{m:[
 "#..........#",
 "#..........#",
 "#..........#",
-"############"],ex:{">":"h",L:"b",R:"e"}},
-b:{m:[
+"############"],
+b:[
 "############",
 "#..........#",
 "#...MT.....#",
@@ -1152,8 +1154,8 @@ b:{m:[
 "#..........#",
 "#..........#",
 "#..........#",
-"############"],ex:{">":"h"}},
-v:{m:[
+"############"],
+v:[
 "############",
 "#..........#",
 "#....C.K...#",
@@ -1165,11 +1167,11 @@ v:{m:[
 "#..........#",
 "#....>.....#",
 "#..........#",
-"############"],ex:{">":"e"}},
-d:{m:["############","#..........#","#..........#","#..........#","#....X.....#","#..........#","#..........#","#..........#","#..........#","#..........#","#..........#","############"],ex:{}}
+"############"],
+d:["############","#..........#","#..........#","#..........#","#....X.....#","#..........#","#..........#","#..........#","#..........#","#..........#","#..........#","############"]
 }
 const BASE2={
-g:{m:[
+g:[
 "############",
 "#..........#",
 "#..L..#..R.#",
@@ -1181,8 +1183,8 @@ g:{m:[
 "#..........#",
 "#..........#",
 "#..........#",
-"############"],ex:{">":"h",L:"b",R:"e"}},
-b:{m:[
+"############"],
+b:[
 "############",
 "#..........#",
 "#...MT.....#",
@@ -1194,8 +1196,8 @@ b:{m:[
 "#..........#",
 "#..........#",
 "#..........#",
-"############"],ex:{">":"h"}},
-v:{m:[
+"############"],
+v:[
 "############",
 "#..........#",
 "#...#C.K...#",
@@ -1207,11 +1209,11 @@ v:{m:[
 "#..........#",
 "#...>......#",
 "#..........#",
-"############"],ex:{">":"e"}},
+"############"],
 d:BASE.d
 }
 const BASE3={
-g:{m:[
+g:[
 "############",
 "#..........#",
 "#..L..S..R.#",
@@ -1223,8 +1225,8 @@ g:{m:[
 "#..........#",
 "#..........#",
 "#..........#",
-"############"],ex:{">":"h",L:"b",R:"e"}},
-b:{m:[
+"############"],
+b:[
 "############",
 "#..........#",
 "#..SMT.....#",
@@ -1236,8 +1238,8 @@ b:{m:[
 "#..........#",
 "#..........#",
 "#..........#",
-"############"],ex:{">":"h"}},
-v:{m:[
+"############"],
+v:[
 "############",
 "#..........#",
 "#...#C.K.S.#",
@@ -1249,7 +1251,46 @@ v:{m:[
 "#..........#",
 "#...>......#",
 "#..........#",
-"############"],ex:{">":"e"}},
+"############"],
 d:BASE.d
 }
-const BASES={1:BASE,2:BASE2,3:BASE3,4:BASE3,5:BASE3,6:BASE3,7:BASE3}
+const BASES={1:BASE,2:BASE2,3:BASE3,4:BASE3,5:BASE3,6:BASE3,7:BASE3,9:BASE}
+// Procedural room slots: floors 2+ draw each variant pick from the authored
+// arrays above plus PROC_SLOTS generated layouts per room type (escapes only
+// through floor 5 — the finale arenas stay authored, as do BASES rooms).
+// Specs feed genRoom() in the engine: exits lists required exit letters
+// ("any" = random open tile), ring is the pit-room O border, walls and pits
+// are tile budgets for wall clusters and pit veins, traps/items sprinkle
+// chars onto open floor, stamp drops a small pattern whole onto the map.
+const PROC_SLOTS=2
+const PROC_SPECS={
+ pits:{ring:1,pits:9,walls:2,exits:{">":"any"},items:{F:1}},
+ idols:{walls:3,exits:{">":"any"},stamp:["ggg","gIg","ggg"]},
+ cracks:{walls:14,traps:{x:3},exits:{">":"any"}},
+ halls:{walls:5,exits:{a:"any",b:"any",c:"any",d:"any",">":"any"},items:{F:1}},
+ escapes:{walls:5,exits:{">":"any"}}
+}
+// Floor topology: room set + exit wiring, consumed generically by build().
+// base: fixed map from BASES[floor]. arr + v: variant array in LEVELS[floor]
+// and the V slot that picks the variant. An exit destination prefixed "!" is
+// one-way: it seals behind you after one crossing. Room codes beyond one char
+// (h2) are extra instances; they inherit family behavior from the first letter.
+const TOPO={
+ g:{base:"g",ex:{">":"h",L:"b",R:"e"}},
+ b:{base:"b",ex:{">":"h"}},
+ v:{base:"v",ex:{">":"e"}},
+ d:{base:"d",ex:{}},
+ h:{arr:"halls",v:"hall",ex:{a:"p",b:"i",c:"c",d:"d",">":"g"}},
+ p:{arr:"pits",v:"pit",ex:{">":"v"}},
+ i:{arr:"idols",v:"idol",ex:{">":"h"}},
+ c:{arr:"cracks",v:"crack",ex:{">":"v"}},
+ e:{arr:"escapes",v:"escape",ex:{">":"g"}}
+}
+const GRAPH={1:TOPO,2:TOPO,3:TOPO,4:TOPO,5:TOPO,6:TOPO,7:TOPO,
+// floor 9: debug proving ground (T in play) — a second hall instance reached
+// by a one-way drop; exit b in h2 climbs back to the first hall.
+9:{
+ g:{base:"g",ex:{">":"h"}},
+ h:{arr:"halls",v:"hall",ex:{a:"!h2",">":"g"}},
+ h2:{arr:"halls",v:"hall",ex:{b:"h",">":"g"}}
+}}
