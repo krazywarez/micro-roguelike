@@ -1255,6 +1255,21 @@ v:[
 d:BASE.d
 }
 const BASES={1:BASE,2:BASE2,3:BASE3,4:BASE3,5:BASE3,6:BASE3,7:BASE3,9:BASE}
+// Procedural room slots: floors 2+ draw each variant pick from the authored
+// arrays above plus PROC_SLOTS generated layouts per room type (escapes only
+// through floor 5 — the finale arenas stay authored, as do BASES rooms).
+// Specs feed genRoom() in the engine: exits lists required exit letters
+// ("any" = random open tile), ring is the pit-room O border, walls and pits
+// are tile budgets for wall clusters and pit veins, traps/items sprinkle
+// chars onto open floor, stamp drops a small pattern whole onto the map.
+const PROC_SLOTS=2
+const PROC_SPECS={
+ pits:{ring:1,pits:9,walls:2,exits:{">":"any"},items:{F:1}},
+ idols:{walls:3,exits:{">":"any"},stamp:["ggg","gIg","ggg"]},
+ cracks:{walls:14,traps:{x:3},exits:{">":"any"}},
+ halls:{walls:5,exits:{a:"any",b:"any",c:"any",d:"any",">":"any"},items:{F:1}},
+ escapes:{walls:5,exits:{">":"any"}}
+}
 // Floor topology: room set + exit wiring, consumed generically by build().
 // base: fixed map from BASES[floor]. arr + v: variant array in LEVELS[floor]
 // and the V slot that picks the variant. An exit destination prefixed "!" is

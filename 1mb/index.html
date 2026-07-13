@@ -131,11 +131,88 @@ function campOffers(next){
   return [a,b]
 }
 
+function genRoom(rand,spec){
+  const pick=n=>(rand()*n)|0,lo=spec.ring?2:1,hi=spec.ring?W-3:W-2
+  const bad=[...(spec.keep||[]),...(spec.blocked||[])]
+  const openAt=(g,x,y)=>g[y][x]=="."&&!bad.some(b=>b[0]==x&&b[1]==y)
+  const spots=g=>{const c=[];for(let y=lo;y<=hi;y++)for(let x=lo;x<=hi;x++)if(openAt(g,x,y))c.push([x,y]);return c}
+  for(let t=0;t<25;t++){
+    const sparse=t==24
+    const g=Array.from({length:H},(_,y)=>Array.from({length:W},(_,x)=>!x||!y||x==W-1||y==H-1?"#":"."))
+    if(spec.ring)for(let i=1;i<W-1;i++)g[1][i]=g[H-2][i]=g[i][1]=g[i][W-2]="O"
+    if(!sparse){
+      for(let w=spec.walls||0;w>0;){
+        const hz=pick(2),len=2+pick(3)
+        const x=lo+pick(hi-lo+1-(hz?len:0)),y=lo+pick(hi-lo+1-(hz?0:len))
+        for(let i=0;i<len;i++)if(openAt(g,hz?x+i:x,hz?y:y+i))g[hz?y:y+i][hz?x+i:x]="#"
+        w-=len
+      }
+      let px=lo+pick(hi-lo+1),py=lo+pick(hi-lo+1)
+      for(let p=spec.pits||0;p>0;p--){
+        if(openAt(g,px,py))g[py][px]="O"
+        if(pick(5)){const d=[[1,0],[-1,0],[0,1],[0,-1]][pick(4)]
+          px=Math.min(hi,Math.max(lo,px+d[0]));py=Math.min(hi,Math.max(lo,py+d[1]))
+        }else{px=lo+pick(hi-lo+1);py=lo+pick(hi-lo+1)}
+      }
+    }
+    if(spec.stamp){
+      const sh=spec.stamp.length,sw=spec.stamp[0].length
+      let put=0
+      for(let s=0;s<20&&!put;s++){
+        const sx=lo+pick(hi-lo+2-sw),sy=lo+pick(hi-lo+2-sh)
+        if(bad.some(b=>b[0]>=sx&&b[0]<sx+sw&&b[1]>=sy&&b[1]<sy+sh))continue
+        for(let y=0;y<sh;y++)for(let x=0;x<sw;x++)g[sy+y][sx+x]=spec.stamp[y][x]
+        put=1
+      }
+      if(!put)continue
+    }
+    let full=0
+    for(const kind of [sparse?0:spec.traps,spec.items])if(kind)for(const ch in kind)for(let n=kind[ch];n>0;n--){
+      const c=spots(g)
+      if(!c.length){full=1;break}
+      const [x,y]=c[pick(c.length)];g[y][x]=ch
+    }
+    for(const ch in spec.exits){
+      const at=spec.exits[ch]
+      if(at=="any"){
+        const c=spots(g)
+        if(!c.length){full=1;break}
+        const [x,y]=c[pick(c.length)];g[y][x]=ch
+      }else g[at[1]][at[0]]=ch
+    }
+    if(full)continue
+    for(const [x,y] of spec.keep||[])if(g[y][x]=="#"||g[y][x]=="O")g[y][x]="."
+    const solid=(x,y)=>g[y][x]=="#"||g[y][x]=="O"||(spec.blocked||[]).some(b=>b[0]==x&&b[1]==y)
+    let total=0,start=null
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(!solid(x,y)){total++;start=start||[x,y]}
+    const seen=new Set([start.join()]),q=[start]
+    while(q.length){
+      const [x,y]=q.pop()
+      for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const nx=x+dx,ny=y+dy,k=nx+","+ny
+        if(nx<0||ny<0||nx>=W||ny>=H||solid(nx,ny)||seen.has(k))continue
+        seen.add(k);q.push([nx,ny])
+      }
+    }
+    if(seen.size==total)return g.map(row=>row.join(""))
+  }
+}
+function procSpec(kind,level,code){
+  const spec={...PROC_SPECS[kind]},keep=[(P[code]||P[code[0]]).slice()],blocked=[]
+  for(const s of BLOCK_SPOTS[level]||[])if(s[0]==code)blocked.push([s[1],s[2]])
+  for(const T of [RELIC_SPOTS,EFFIGY_SPOTS,BRAZIER_SPOTS,SHRINE_SPOTS,CURSE_SPOTS,SHADE_SPOTS,WATCHER_SPOTS,LEECH_SPOTS])
+    for(const s of T[level]||[])if(s[0]==code)keep.push([s[1],s[2]])
+  if(kind=="escapes")for(const b of LEVELS[level].beasts)keep.push(b.slice())
+  spec.keep=keep;spec.blocked=blocked
+  return spec
+}
+
 function build(seed0){
   const level=S&&S.level||1
   const L=LEVELS[level],r=rng(seed0+(level-1)*9973)
   const B=BASES[level]
-  V={hall:(r()*L.halls.length)|0,pit:(r()*L.pits.length)|0,idol:(r()*L.idols.length)|0,crack:(r()*L.cracks.length)|0,escape:(r()*L.escapes.length)|0,beast:(r()*L.beasts.length)|0}
+  const slots=k=>level<2||(k=="escapes"&&level>=6)?0:PROC_SLOTS
+  V={hall:(r()*(L.halls.length+slots("halls")))|0,pit:(r()*(L.pits.length+slots("pits")))|0,idol:(r()*(L.idols.length+slots("idols")))|0,crack:(r()*(L.cracks.length+slots("cracks")))|0,escape:(r()*(L.escapes.length+slots("escapes")))|0,beast:(r()*L.beasts.length)|0}
   B0=L.beasts[V.beast]
   const relicBag=RELIC_IDS.slice().sort(()=>r()-.5)
   O={relics:pickSpots(r,RELIC_SPOTS[level]||[],(level>=5?RELIC_SLOTS_HIGH:level>=3?RELIC_SLOTS_MID:RELIC_SLOTS_LOW)+(S&&S.mods&&S.mods.includes("rich")?RELIC_SLOTS_RICH_BONUS:0)).map((v,i)=>({r:v[0],x:v[1],y:v[2],id:relicBag[i%relicBag.length],on:1})),
@@ -149,8 +226,17 @@ function build(seed0){
     effigies:pickSpots(r,EFFIGY_SPOTS[level]||[],Math.max(0,level-1)).map(v=>({r:v[0],x:v[1],y:v[2],on:1}))}
   R={}
   for(const code in GRAPH[level]){
-    const spec=GRAPH[level][code]
-    R[code]={m:spec.base?B[spec.base]:L[spec.arr][V[spec.v]],ex:{...spec.ex}}
+    const spec=GRAPH[level][code],arr=L[spec.arr],vi=V[spec.v]
+    const m=spec.base?B[spec.base]:vi<arr.length?arr[vi]:genRoom(r,procSpec(spec.arr,level,code))||arr[vi%arr.length]
+    R[code]={m,ex:{...spec.ex}}
+  }
+  if(R.e&&V.escape>=L.escapes.length){
+    let ok=escapeSolve(level,V.escape,V.beast,level>=3?8:6)
+    for(let i=0;i<6&&!ok;i++){
+      R.e.m=genRoom(r,procSpec("escapes",level,"e"))||L.escapes[V.escape%L.escapes.length]
+      ok=escapeSolve(level,V.escape,V.beast,level>=3?8:6)
+    }
+    if(!ok)R.e.m=L.escapes[V.escape%L.escapes.length]
   }
 }
 
@@ -494,7 +580,7 @@ function variantSummary(){
 }
 
 function escapeSolve(level=S.level,escapeIdx=V.escape,beastIdx=V.beast,torch=6){
-  const map=LEVELS[level].escapes[escapeIdx],start=P.e,beast=LEVELS[level].beasts[beastIdx],q=[[{x:start[0],y:start[1],bx:beast[0],by:beast[1],torch,chase:0,ward:level==3?8:0},""]],seen=new Set()
+  const map=LEVELS[level].escapes[escapeIdx]||R.e.m,start=P.e,beast=LEVELS[level].beasts[beastIdx],q=[[{x:start[0],y:start[1],bx:beast[0],by:beast[1],torch,chase:0,ward:level==3?8:0},""]],seen=new Set()
   while(q.length){
     const [s,path]=q.shift(),k=[s.x,s.y,s.bx,s.by,s.torch,s.chase,s.ward].join()
     if(seen.has(k))continue
