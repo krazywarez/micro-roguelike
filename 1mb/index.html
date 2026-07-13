@@ -615,18 +615,70 @@ function escapeSolve(level=S.level,escapeIdx=V.escape,beastIdx=V.beast,torch=6){
   return ""
 }
 
-function validateSeeds(n=24){
-  const keep=S
-  let bad=0,msg=[]
-  for(const level of [2,3,4,5,6])for(let i=0;i<n;i++){
-    const t={level,mods:keep.mods||pickMods(seed+i)}
-    S=t;build(seed+i)
-    const path=escapeSolve(level,V.escape,V.beast,level>=3?8:6)
-    if(!path){bad++;if(msg.length<6)msg.push(`l${level}:${(seed+i).toString(36)} e${V.escape} b${V.beast}`)}
+function floorSolve(seed0,level=S&&S.level||1){
+  const kS=S,kV=V,kR=R,kO=O,kB=B0
+  S={level,mods:kS&&kS.mods||pickMods(seed0)}
+  build(seed0)
+  const solidAt=(rm,x,y)=>{const t=R[rm].m[y][x];return t=="#"||t=="O"||!!overAt(rm,x,y,"blocks")}
+  const find=(rm,ch)=>{for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(R[rm].m[y][x]==ch)return [x,y];return null}
+  const exitTo=(rm,dest)=>{for(const ch in R[rm].ex)if(R[rm].ex[ch].replace("!","")==dest)return find(rm,ch);return null}
+  const cost=(rm,from,...tos)=>{
+    let total=0,at=from
+    for(const to of tos){
+      if(!to)return -1
+      let d=-1
+      const seen=new Set([at.join()]),q=[[at[0],at[1],0]]
+      while(q.length){
+        const [x,y,n]=q.shift()
+        if(x==to[0]&&y==to[1]){d=n;break}
+        for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+          const nx=x+dx,ny=y+dy,k=nx+","+ny
+          if(nx<0||ny<0||nx>=W||ny>=H||seen.has(k)||solidAt(rm,nx,ny))continue
+          seen.add(k);q.push([nx,ny,n+1])
+        }
+      }
+      if(d<0)return -1
+      total+=d;at=to
+    }
+    return total
   }
-  S=keep
-  build(seed)
-  return `check ${n} seeds | ${bad?"bad "+bad+" "+msg.join(", "):"all clear"}`
+  const sp=rm=>(P[rm]||P[rm[0]]).slice()
+  const out=(()=>{
+    if(!R.b||!R.h||!R.i||!R.v||!R.e)return ""
+    let total=0
+    for(const c of [
+      cost("g",sp("g"),exitTo("g","b")),
+      cost("b",sp("b"),find("b","T"),exitTo("b","h")),
+      cost("h",sp("h"),exitTo("h","i")),
+      cost("i",sp("i"),find("i","I"),exitTo("i","h"))
+    ]){if(c<0)return "";total+=c}
+    const via=r2=>{
+      const a=cost("h",sp("h"),exitTo("h",r2))
+      if(a<0)return -1
+      const b=cost(r2,sp(r2),exitTo(r2,"v"))
+      return b<0?-1:a+b
+    }
+    const vp=via("p"),vc=via("c")
+    if(vp<0&&vc<0)return ""
+    total+=vp<0?vc:vc<0?vp:Math.min(vp,vc)
+    const vault=cost("v",sp("v"),find("v","C"),find("v","K"),exitTo("v","e"))
+    if(vault<0)return ""
+    total+=vault
+    // floor 1 crosses e with fresh-run fuel plus a brazier refuel: 8 is fair
+    const esc=escapeSolve(level,V.escape,V.beast,level==2?6:8)
+    if(!esc)return ""
+    return "ok:"+(total+esc.length)
+  })()
+  S=kS;V=kV;R=kR;O=kO;B0=kB
+  return out
+}
+
+function validateSeeds(n=24){
+  let bad=0,msg=[]
+  for(const level of [1,2,3,4,5,6,7])for(let i=0;i<n;i++){
+    if(!floorSolve(seed+i,level)){bad++;if(msg.length<6)msg.push(`l${level}:${(seed+i).toString(36)}`)}
+  }
+  return `check ${n} seeds x floors 1-7 | ${bad?"bad "+bad+" "+msg.join(", "):"all clear"}`
 }
 
 function dropTorch(){
@@ -1012,7 +1064,7 @@ function render(){
     remember()
     const th=floorTheme()
     U.innerHTML=`floor ${S.level} | ${th.name}<small>${buildTitle()} | ${th.tag} | ${th.accent} | ${MODES[S.mode||"standard"].label} | seed ${S.seed.toString(36)}</small>`
-    I.textContent=sidePanel()+(DBG.show?`\n\ndebug\n${variantSummary()}\nsolve  : ${R.e?escapeSolve(S.level,V.escape,V.beast,S.level>=3?8:6)?"ok":"fail":"n/a"}${DBG.out?`\ncheck  : ${DBG.out}`:""}\nkeys   : v V R j J k K T`:"")
+    I.textContent=sidePanel()+(DBG.show?`\n\ndebug\n${variantSummary()}\nsolve  : ${R.e?escapeSolve(S.level,V.escape,V.beast,S.level>=3?8:6)?"ok":"fail":"n/a"}\nfloor  : ${R.i&&R.v&&R.e?floorSolve(seed,S.level)||"fail":"n/a"}${DBG.out?`\ncheck  : ${DBG.out}`:""}\nkeys   : v V R j J k K T`:"")
     L.textContent=[S.msg,S.hint,roomMsg()].filter(Boolean).join("\n")
     X.onclick=()=>{reset(1);render()}
     X.hidden=true

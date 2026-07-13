@@ -4,8 +4,9 @@
 //
 // Loads the real, unmodified game: evaluates 1mb/data.js and the inline
 // engine script from 1mb/index.html inside a stubbed browser environment,
-// then sweeps seedCount seeds x floors 2-6 asserting escapeSolve() finds a
-// path — the same check the in-game validateSeeds() runs.
+// then sweeps seedCount seeds x floors 1-7 asserting floorSolve() proves
+// each full floor completable (gate -> torch -> bow -> vault -> escape
+// room -> gate) — the same check the in-game validateSeeds() runs.
 "use strict"
 const fs = require("fs")
 const path = require("path")
@@ -69,11 +70,13 @@ try {
 const driver = vm.runInContext(`(function (seeds) {
   const fails = []
   for (const s0 of seeds) {
-    for (const level of [2, 3, 4, 5, 6]) {
+    for (const level of [1, 2, 3, 4, 5, 6, 7]) {
       S = { level, mods: pickMods(s0) }
-      build(s0)
-      const p = escapeSolve(level, V.escape, V.beast, level >= 3 ? 8 : 6)
-      if (!p) fails.push({ seed: s0, level, escape: V.escape, beast: V.beast, hall: V.hall, pit: V.pit, crack: V.crack })
+      if (!floorSolve(s0, level)) {
+        S = { level, mods: pickMods(s0) }
+        build(s0)
+        fails.push({ seed: s0, level, escape: V.escape, beast: V.beast, hall: V.hall, pit: V.pit, crack: V.crack, idol: V.idol })
+      }
     }
   }
   return JSON.stringify(fails)
@@ -88,14 +91,14 @@ const seeds = JSON.parse(seedsJson)
 const t0 = Date.now()
 const fails = JSON.parse(driver(seeds))
 const elapsed = ((Date.now() - t0) / 1000).toFixed(1)
-const checks = seedCount * 5
+const checks = seedCount * 7
 
 if (fails.length) {
-  console.error(`validate: ${fails.length}/${checks} escape rooms UNSOLVABLE (${seedCount} seeds x floors 2-6, ${elapsed}s)`)
+  console.error(`validate: ${fails.length}/${checks} floors NOT COMPLETABLE (${seedCount} seeds x floors 1-7, ${elapsed}s)`)
   for (const f of fails.slice(0, 20)) {
-    console.error(`  seed ${f.seed.toString(36)} floor ${f.level}: escape variant ${f.escape}, beast variant ${f.beast} (hall ${f.hall}, pit ${f.pit}, crack ${f.crack})`)
+    console.error(`  seed ${f.seed.toString(36)} floor ${f.level}: escape variant ${f.escape}, beast variant ${f.beast} (hall ${f.hall}, pit ${f.pit}, crack ${f.crack}, idol ${f.idol})`)
   }
   if (fails.length > 20) console.error(`  ... and ${fails.length - 20} more`)
   process.exit(1)
 }
-console.log(`validate: OK — ${checks} escape rooms solvable (${seedCount} seeds x floors 2-6, ${elapsed}s)`)
+console.log(`validate: OK — ${checks} full floors solvable (${seedCount} seeds x floors 1-7, ${elapsed}s)`)
