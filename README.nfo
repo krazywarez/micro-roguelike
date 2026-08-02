@@ -1,0 +1,56 @@
+┌──────────────────────────────────────────────────────────────┐
+│  M I C R O - R O G U E L I K E             [ KRZ ]   krz.sh  │
+└──────────────────────────────────────────────────────────────┘
+
+WHAT
+  two small roguelikes at two size limits. explore, grab loot, don't
+  die, get out. open either in a browser. nothing to install.
+
+1MB VERSION
+  play: https://rogue.krz.sh/1mb/
+
+  a 12x12 grid, torches and shadows, a beast that hunts you, six
+  floors to daylight, and a secret seventh. reach the gate on floor 6
+  with the crown and the key.
+
+  controls:
+  - arrow keys / wasd   move
+  - space or .          wait a turn
+  - t                   drop torch
+  - m                   mute / unmute
+  - r                   restart
+  - c                   continue a saved run (title screen)
+
+  on mobile an on-screen d-pad appears.
+
+  modes (press a number on the title screen):
+  1 standard   2 iron    3 greed   4 dark
+  5 daily      6 heavy   7 swift   8 warded
+
+  win once and a hidden seventh floor opens.
+
+  budget: the game is the two raw files in 1mb/, no build step, and
+  together they stay under 1,048,576 bytes (1 MiB). tools/check.sh is
+  the gate; it prints the byte ledger and proves every escape room
+  stays winnable across hundreds of seeds. ledger history in
+  docs/SIZES.txt.
+
+      tools/check.sh
+
+  run it before each commit:
+
+      ln -s ../../tools/pre-commit .git/hooks/pre-commit
+
+1KB VERSION
+  play: https://rogue.krz.sh/1kb/#g
+
+  the whole game in about a kilobyte of html. no javascript, just
+  links between rooms. find the key and the crown, make it back out
+  through the gate. controls: click the links.
+
+LICENSE
+  0bsd. see LICENSE.
+
+┌──────────────────────────────────────────────────────────────┐
+│  krz.sh                                                      │
+└──────────────────────────────────────────────────────────────┘
