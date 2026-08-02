@@ -8,7 +8,7 @@ Pick one and open it in your browser — no install, no account, nothing to down
 
 ## 1MB Version — the full game
 
-**[Play it](https://rogue.zerolabs.sh/1mb/)**
+**[Play it](https://rogue.krz.sh/1mb/)**
 
 A proper dungeon crawl: a 12x12 grid, torches and shadows, a beast that hunts you, and six floors between you and daylight (plus a secret seventh, if you make it out alive).
 
@@ -63,7 +63,7 @@ To run it automatically before each commit: `ln -s ../../tools/pre-commit .git/h
 
 ## 1KB Version — the hypertext original
 
-**[Play it](https://rogue.zerolabs.sh/1kb/#g)**
+**[Play it](https://rogue.krz.sh/1kb/#g)**
 
 The whole game fits in about a kilobyte of HTML. No JavaScript — just links between rooms. Click your way through the ruin: find the torch, dodge the beast, don't reach for the wrong thing.
 
