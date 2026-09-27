@@ -1,6 +1,6 @@
 // Game data — edit this file to mod the run (floors, relics, hazards, balance).
 // Loaded before the engine in index.html.
-const W=12,H=12,FUEL=16
+const W=12,H=12,FUEL=16,THIN_FUEL_BONUS=10
 const BEAST_CALM_RADIUS=4,BEAST_ENRAGED_SPEED=2,TORCH_DRAIN_BASE=1,TORCH_DRAIN_HAZARD=2,RELIC_SLOTS_LOW=2,RELIC_SLOTS_MID=3,RELIC_SLOTS_HIGH=4,RELIC_SLOTS_RICH_BONUS=1
 const P={g:[5,2],b:[2,2],e:[2,9],h:[2,9],p:[2,2],i:[2,2],c:[2,2],v:[2,2],d:[2,2]}
 const PITS=[[
@@ -1022,6 +1022,28 @@ const HINT_TEXT={
  crack:"Cracks are fast but costly. Mask or ward makes the crossing safer.",
  beast:"Fire slows pursuit. A dropped torch can buy one clean lane."
 }
+// Side-panel legend: one line per interactable visible in the current room.
+const LEGEND={
+ O:"pit edge: kills unless beside a wall or carrying a torch",
+ T:"torch: light; stops lost steps in the dark, keeps pit edges safe, slows the beast",
+ M:"mask: eases dark, lets gold through the crack; fire stops slowing the beast",
+ S:"shrine: raises ward; from floor 3 ward stops the dark stealing steps",
+ r:"relic: a trade, one edge for one cost (named on pickup)",
+ effigy:"some relics in this room are false; a false one kills",
+ F:"brazier: relights or refuels your torch",
+ x:"crack: burns torch and gives the beast a free move",
+ z:"curse: raises dread (dark steals more steps) and chips ward",
+ n:"shade: drains torch and raises dread; in the den it draws the beast",
+ q:"watcher: beast pursuit jumps; costs torch",
+ l:"leech: eats ward and torch",
+ I:"idol: step on the idol, its gold, or its shrine to bow",
+ g:"gold: quickens the beast; fatal in the crack unless masked",
+ C:"crown: bow to the idol first or die; counts as gold",
+ K:"key: take it with the crown back to the gate",
+ B:"beast: kills on contact; fire and a dropped torch slow it",
+ dark:"dark: without a torch, dread builds and steps get lost"
+}
+const ROOM_NAMES={g:"gate",b:"bone room",e:"beast den",h:"hall",p:"pit room",i:"idol room",c:"crack",v:"vault",d:"black arch"}
 const RELICS={
  ember:{name:"ember heart",label:"ember",up:"slower torch drain",down:"beast ignores dropped flame"},
  tooth:{name:"gold tooth",label:"tooth",up:"gold slips the crack",down:"beast enrages sooner"},

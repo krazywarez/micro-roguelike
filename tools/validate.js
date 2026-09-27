@@ -8,62 +8,13 @@
 // each full floor completable (gate -> torch -> bow -> vault -> escape
 // room -> gate) — the same check the in-game validateSeeds() runs.
 "use strict"
-const fs = require("fs")
 const path = require("path")
 const vm = require("vm")
 
 const seedCount = Math.max(1, parseInt(process.argv[2], 10) || 200)
 const gameDir = process.argv[3] || path.join(__dirname, "..", "1mb")
 
-const html = fs.readFileSync(path.join(gameDir, "index.html"), "utf8")
-const dataSrc = fs.readFileSync(path.join(gameDir, "data.js"), "utf8")
-
-// The engine is the inline <script> block that follows the data.js include.
-const m = html.match(/<script src=data\.js><\/script>\s*<script>([\s\S]*?)<\/script>/)
-if (!m) {
-  console.error("validate: could not find the inline engine <script> after the data.js include in index.html")
-  process.exit(2)
-}
-const engineSrc = m[1]
-
-// Minimal inert DOM node — enough surface for the engine's load-time render().
-function el() {
-  return {
-    dataset: {},
-    textContent: "",
-    innerHTML: "",
-    className: "",
-    hidden: false,
-    appendChild() {},
-    onclick: null,
-  }
-}
-
-const sandbox = {
-  document: {
-    getElementById: () => el(),
-    createElement: () => el(),
-  },
-  addEventListener() {},
-  localStorage: {
-    _mem: Object.create(null),
-    getItem(k) { return k in this._mem ? this._mem[k] : null },
-    setItem(k, v) { this._mem[k] = String(v) },
-    removeItem(k) { delete this._mem[k] },
-  },
-  window: { AudioContext: function () { throw new Error("SFX must not run headless") } },
-  console,
-}
-const ctx = vm.createContext(sandbox)
-
-try {
-  vm.runInContext(dataSrc, ctx, { filename: "1mb/data.js" })
-  vm.runInContext(engineSrc, ctx, { filename: "1mb/index.html#engine" })
-} catch (e) {
-  console.error("validate: game code failed to evaluate headless — improve the stubs in this harness, do not touch the game.")
-  console.error(e && e.stack || e)
-  process.exit(2)
-}
+const ctx = require("./engine").load(gameDir)
 
 // Runs in the same context, so it sees the engine's top-level let/const
 // bindings (S, V) and functions (build, pickMods, escapeSolve) directly.
@@ -102,3 +53,32 @@ if (fails.length) {
   process.exit(1)
 }
 console.log(`validate: OK — ${checks} full floors solvable (${seedCount} seeds x floors 1-7, ${elapsed}s)`)
+
+// Every interactable that can appear on floors 1-7 needs a LEGEND line and
+// every exit destination a ROOM_NAMES entry. Room d kills on entry, so its
+// contents are never shown.
+const missing = JSON.parse(vm.runInContext(`JSON.stringify((() => {
+  const miss = {}
+  for (const s0 of ${seedsJson}) {
+    for (const level of [1, 2, 3, 4, 5, 6, 7]) {
+      S = { level, mods: pickMods(s0), flags: {}, drop: null, seen: {} }
+      build(s0)
+      for (const r in R) {
+        if (r[0] == "d") continue
+        for (const ch in R[r].ex) if (!ROOM_NAMES[R[r].ex[ch].replace("!", "")[0]]) miss["exit " + r + ":" + ch] = level
+        for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+          const t = tile(x, y, r)
+          if (t != "." && t != "#" && t != ">" && !(t in R[r].ex) && !LEGEND[t]) miss["tile " + t] = level
+        }
+        if (O.effigies.some(o => o.r == r) && !LEGEND.effigy) miss.effigy = level
+      }
+    }
+  }
+  return miss
+})())`, ctx, { filename: "validate-legend" }))
+const gaps = Object.keys(missing)
+if (gaps.length) {
+  console.error(`validate: ${gaps.length} interactables without a legend entry: ${gaps.map(g => `${g} (floor ${missing[g]})`).join(", ")}`)
+  process.exit(1)
+}
+console.log("validate: OK — every interactable has a legend entry")

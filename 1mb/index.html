@@ -39,7 +39,7 @@ linear-gradient(180deg,transparent,rgba(0,0,0,.12));mix-blend-mode:screen;opacit
 .warded{box-shadow:inset 0 0 0 1px var(--wardGlow);background:radial-gradient(circle at 50% 50%,#ffffff08,transparent 72%)}
 .haz{filter:brightness(1.14)}
 .fog1{opacity:.9}.fog2{opacity:.72}.fog3{opacity:.55}
-#g.hit{transform:translateX(2px);box-shadow:inset 0 0 0 1px #000,0 0 24px #0008,0 0 14px color-mix(in srgb,var(--hazard) 70%,#000)}#g.win{box-shadow:inset 0 0 0 1px #000,0 0 24px #0008,0 0 14px var(--glow)}#g.shift{transform:scale(1.02)}#g.ward{animation:wardbreak .2s ease-out}#g.relic{animation:relicpulse .24s ease-out}
+#g.hit{transform:translateX(2px);box-shadow:inset 0 0 0 1px #000,0 0 24px #0008,0 0 14px color-mix(in srgb,var(--hazard) 70%,#000)}#g.win{box-shadow:inset 0 0 0 1px #000,0 0 24px #0008,0 0 14px var(--glow)}#g.shift{transform:scale(1.02)}#g.ward{animation:wardbreak .2s ease-out}#g.relic{animation:relicpulse .24s ease-out}#g.dark{animation:darkstep .3s ease-out}
 #u.dead,#u.win,#u.camp{letter-spacing:.12em;text-transform:uppercase}
 #s[data-floor="1"]{--bg0:#0a130d;--bg1:#020302;--panel:#08100bdd;--panelEdge:#29442e;--gridEdge:#213929;--accent:#9fe2ab;--accent2:#f0cc76;--fog:#dbf5df;--mist:#88c6911c;--glow:#9be8a055;--gridGlow:#9be8a020;--floor:#132217;--memory:#667f6a;--wall:#6c786f;--pit:#ad584a;--exit:#f3d487;--torch:#ffbf67;--shrine:#9df1df;--relic:#ffe28f;--hazard:#ff8b77;--shade:#a7c8ff;--watcher:#ffd298;--leech:#8ef0db;--beast:#ff81d9;--player:#fbfff8}
 #s[data-floor="2"]{--bg0:#170d08;--bg1:#040202;--panel:#130b08e1;--panelEdge:#5c3520;--gridEdge:#4d2d1e;--accent:#ffb07a;--accent2:#ffd18f;--fog:#ffd9c0;--mist:#ff985415;--glow:#ff9d6260;--gridGlow:#ff9d6224;--floor:#24130d;--memory:#8a665b;--wall:#8f6d63;--pit:#dd6a55;--exit:#ffd48a;--torch:#ffaf59;--shrine:#ffd0a6;--relic:#ffe08e;--hazard:#ff7766;--shade:#d3c0ff;--watcher:#ffd0ad;--leech:#f1b68f;--beast:#ff7eb4;--player:#fff7f1}
@@ -53,13 +53,16 @@ linear-gradient(180deg,transparent,rgba(0,0,0,.12));mix-blend-mode:screen;opacit
 #s[data-state="win"]{--accent:#f3dd8f;--panelEdge:#7a6930;--gridEdge:#6e5f2c;--mist:#f3dd8f18}
 #s[data-state="camp"]{--accent:#c8f2dd;--panelEdge:#376050;--gridEdge:#2f5648;--mist:#8ff0cc18}
 @media (max-width:780px){#s{justify-content:flex-start;padding:12px 10px 20px}#p{flex-direction:column;align-items:center;width:100%}#g,#i,#g.splash,#l,#u{width:min(92vw,420px);max-width:100%}#i,#g.splash{min-width:0}#g.splash{overflow:auto}#s[data-state="play"] #d{display:grid}}
+#s.gfx{--cs:min(40px,calc((92vw - 26px)/12))}#s.gfx #g:not(.splash){grid-template-columns:repeat(12,var(--cs));gap:0}#s.gfx .t{width:var(--cs);height:var(--cs);font-size:0;text-shadow:none}.t>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.t>b{position:relative;font-size:calc(var(--cs)*.6)}.t>b.dl{font-size:calc(var(--cs)*.34);color:var(--exit);top:10%}.lg{white-space:normal;margin-bottom:10px;color:var(--muted)}.lr{display:flex;gap:6px;align-items:flex-start;color:var(--text);margin:1px 0}.lr i{flex:0 0 1.5em;height:1.5em;font-style:normal;text-align:center;color:var(--accent)}.lr i svg{width:100%;height:100%}.B.alert{--eye:#ffa8e4}.B.enraged{--eye:#ff4040}
 @keyframes flicker{0%,100%{opacity:1;transform:translateY(0)}25%{opacity:.75;transform:translateY(-.5px)}50%{opacity:.94}75%{opacity:.68;transform:translateY(.5px)}}
 @keyframes pulse{0%,100%{opacity:.84;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
 @keyframes step{0%{transform:scale(.82)}100%{transform:scale(1)}}
 @keyframes wardbreak{0%{filter:brightness(1.35)}100%{filter:brightness(1)}}
+@keyframes darkstep{0%{filter:brightness(.3);transform:translateX(-3px)}35%{transform:translateX(3px)}70%{transform:translateX(-1px)}100%{filter:brightness(1);transform:none}}
 @keyframes relicpulse{0%{transform:scale(1)}50%{transform:scale(1.035)}100%{transform:scale(1)}}
 </style>
 <div id=s><div id=u></div><div id=p><div id=g></div><div id=i></div></div><div id=l></div><div id=d><button data-k=ArrowUp class=pu>^</button><button data-k=ArrowLeft class=pl>&lt;</button><button data-k=. class=pw>*</button><button data-k=ArrowRight class=pr>&gt;</button><button data-k=ArrowDown class=pd>v</button></div><button id=r hidden>restart</button></div>
+<script src=sprites.js></script>
 <script src=data.js></script>
 <script>
 const SEl=document.getElementById("s"),U=document.getElementById("u"),G=document.getElementById("g"),I=document.getElementById("i"),L=document.getElementById("l"),X=document.getElementById("r"),D=document.getElementById("d")
@@ -550,6 +553,34 @@ function sidePanel(){
   return `${inv()}\n\nrun\n${statRow("title",buildTitle())}\n${statRow("route",z.route)}\n${statRow("style",z.style)}\n${statRow("floor",`${S.level} ${th.name}`)}\n${statRow("mood",th.tag)}\n${statRow("mode",MODES[S.mode||"standard"].label)}\n${statRow("mods",modSummary())}\n${statRow("turns",S.turn)}\n${statRow("beast",beastState())}`
 }
 
+function exitNote(dest){
+  if(dest[0]=="d")return " (death)"
+  if(dest[0]=="c"&&S.flags.gold&&!S.flags.mask&&S.flags.relic!="tooth")return S.level>=3&&S.flags.ward?" (gold: costs ward)":" (gold: death)"
+  if(dest[0]=="g"&&S.flags.crown&&S.flags.key)return " (crown and key: go on)"
+  return ""
+}
+function legendRows(){
+  const here={},rows=[]
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(visible(x,y)||seen(x,y))here[tile(x,y)]=1
+  if(S.r[0]=="e"&&visible(S.beast.x,S.beast.y))here.B=1
+  if(here.r&&O.effigies.some(o=>o.on&&o.r==S.r))here.effigy=1
+  if(dark()&&!S.flags.torch)here.dark=1
+  for(const k in LEGEND)if(here[k])rows.push([k,LEGEND[k]])
+  return rows
+}
+function exitRows(){
+  const ex=R[S.r].ex
+  return Object.keys(ex).map(ch=>{const dest=ex[ch].replace("!","");return [ch,`${ROOM_NAMES[dest[0]]}${ex[ch][0]=="!"?" (one way)":""}${exitNote(dest)}`,dest]})
+}
+function legendHTML(){
+  const esc=v=>v.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c])
+  const row=(icon,text)=>`<div class=lr><i>${icon}</i><span>${esc(text)}</span></div>`
+  const glyph=k=>k=="effigy"?"*":k=="dark"?"":k=="B"?"B":tileGlyph(k,-1,-1,1)
+  const here=legendRows().map(([k,t])=>row(GFX?gfxIcon(k):esc(glyph(k)),t))
+  const exits=exitRows().map(([ch,t,dest])=>row(GFX?gfxIcon(ch==">"?"i":dest[0]=="d"?"Dd":"D"):esc(ch),GFX&&ch!=">"?`${ch} ${t}`:t))
+  return `<div class=lg>${here.length?`here${here.join("")}`:""}exits${exits.join("")}<div class=lr><i></i><span>keys: t drop torch, . wait</span></div></div>`
+}
+
 function frame(lines,w=31){
   const body=lines.map(line=>{
     const s=(line||"").slice(0,w)
@@ -834,7 +865,7 @@ function touch(t,x,y){
   if(t=="O"&&!pitSafe(x,y))return die("You step into the dark and do not find the edge.")
   if(S.r=="e"&&x==S.beast.x&&y==S.beast.y)return die("The beast tears you open.")
   if(S.drop&&S.drop.r==S.r&&S.drop.x==x&&S.drop.y==y&&S.drop.fuel){S.flags.torch=S.drop.fuel;S.drop=null;S.flags.ash=0;return setMsg("Recover the torch.")}
-  if(t=="T"&&!S.flags.torch){S.flags.torch=FUEL;S.flags.ash=0;showHint("torch");setMsg("Take the torch.")}
+  if(t=="T"&&!S.flags.torch){S.flags.torch=FUEL+(hasMod("thin")?THIN_FUEL_BONUS:0);S.flags.ash=0;showHint("torch");setMsg("Take the torch.")}
   if(t=="M"&&!S.flags.mask){S.flags.mask=1;setMsg("Take the funeral mask. Dark eases, but flame stops slowing the beast.")} 
   if(t=="S"){
     const wardBase=S.level>=3?8:4
@@ -855,7 +886,7 @@ function touch(t,x,y){
     }
   }
   if(t=="F"){
-    const cap=FUEL+(S.flags.relic=="wick"?4:0)
+    const cap=FUEL+(S.flags.relic=="wick"?4:0)+(hasMod("thin")?THIN_FUEL_BONUS:0)
     const fill=S.flags.relic=="ash"?10:S.flags.relic=="wick"?8:6
     const gain=S.flags.relic=="ash"?6:4
     if(S.flags.ash||!S.flags.torch){S.flags.torch=fill;S.flags.ash=0;setMsg("Light the torch from the brazier.")}
@@ -923,7 +954,7 @@ function step(dx,dy){
   const nx=S.x+dx,ny=S.y+dy,t=tile(nx,ny)
   if(t=="#")return setMsg(roomMsg())
   S.turn++
-  if(shadow()){setMsg("Darkness twists the room around you.");burnTorch();beastTurn();return}
+  if(shadow()){setMsg("Darkness twists the room around you.");S.fx="dark";burnTorch();beastTurn();return}
   let ex=R[S.r].ex[t]
   if(ex){
     if(ex[0]=="!"){delete R[S.r].ex[t];ex=ex.slice(1)}
@@ -969,6 +1000,7 @@ function testFloor(){
 
 function key(e){
   if(e.key=="m"){muted=!muted;render();return}
+  if(e.key=="g"){gfxToggle();render();return}
   if(S.gameState=="win"&&(e.key=="p"||e.key=="7")){startPostgame();render();return}
   if(S.gameState=="title"){
     if("12345678".includes(e.key)){startRun(MODE_IDS[+e.key-1],1);render();return}
@@ -1020,6 +1052,7 @@ function cls(x,y){
 }
 
 function render(){
+  SEl.classList.toggle("gfx",!!GFX)
   U.className=S.gameState
   SEl.dataset.state=S.gameState
   SEl.dataset.floor=S.level||1
@@ -1027,7 +1060,7 @@ function render(){
   if(S.gameState=="title"){
     delete G.dataset.intro
     U.innerHTML=`1MB ROGUELIKE<small>single-file campaign | minimalist descent</small>`
-    I.textContent=`modes\n1  standard  ${MODES.standard.desc}\n2  iron      ${MODES.iron.desc}\n3  greed     ${MODES.greed.desc}\n4  dark      ${MODES.dark.desc}\n5  daily     ${MODES.daily.desc}\n6  heavy     ${MODES.heavy.desc}\n7  swift     ${MODES.swift.desc}\n8  warded    ${MODES.warded.desc}\n\nkeys\n1-8 begin\nr   quick run${hasSave?"\nc   continue saved run":""}\nm   mute sound\n\nglyphs\n@ you      B beast    * relic\nY shrine   & brazier  t torch\n! crack    ^ curse    Q watcher\nj leech    $ gold     > gate`
+    I.textContent=`modes\n1  standard  ${MODES.standard.desc}\n2  iron      ${MODES.iron.desc}\n3  greed     ${MODES.greed.desc}\n4  dark      ${MODES.dark.desc}\n5  daily     ${MODES.daily.desc}\n6  heavy     ${MODES.heavy.desc}\n7  swift     ${MODES.swift.desc}\n8  warded    ${MODES.warded.desc}\n\nkeys\n1-8 begin\nr   quick run${hasSave?"\nc   continue saved run":""}\nm   mute sound\ng   graphics / ascii\n\nglyphs\n@ you      B beast    * relic\nY shrine   & brazier  t torch\n! crack    ^ curse    Q watcher\nj leech    $ gold     > gate\n\nin play, the side panel explains\nevery item and exit in the room`
     L.textContent=`Pick a mode, then descend. Flame buys time; wards buy mistakes.${hasSave?" A saved run is waiting — press c to continue.":""}`
     X.textContent="start standard"
     X.onclick=()=>{startRun("standard",1);render()}
@@ -1064,8 +1097,9 @@ function render(){
     remember()
     const th=floorTheme()
     U.innerHTML=`floor ${S.level} | ${th.name}<small>${buildTitle()} | ${th.tag} | ${th.accent} | ${MODES[S.mode||"standard"].label} | seed ${S.seed.toString(36)}</small>`
-    I.textContent=sidePanel()+(DBG.show?`\n\ndebug\n${variantSummary()}\nsolve  : ${R.e?escapeSolve(S.level,V.escape,V.beast,S.level>=3?8:6)?"ok":"fail":"n/a"}\nfloor  : ${R.i&&R.v&&R.e?floorSolve(seed,S.level)||"fail":"n/a"}${DBG.out?`\ncheck  : ${DBG.out}`:""}\nkeys   : v V R j J k K T`:"")
-    L.textContent=[S.msg,S.hint,roomMsg()].filter(Boolean).join("\n")
+    I.innerHTML=legendHTML()
+    I.insertAdjacentText("beforeend",sidePanel()+(DBG.show?`\n\ndebug\n${variantSummary()}\nsolve  : ${R.e?escapeSolve(S.level,V.escape,V.beast,S.level>=3?8:6)?"ok":"fail":"n/a"}\nfloor  : ${R.i&&R.v&&R.e?floorSolve(seed,S.level)||"fail":"n/a"}${DBG.out?`\ncheck  : ${DBG.out}`:""}\nkeys   : v V R j J k K T`:""))
+    L.textContent=[...new Set([S.msg,S.hint,roomMsg()])].filter(Boolean).join("\n")
     X.onclick=()=>{reset(1);render()}
     X.hidden=true
     if(S.intro)G.dataset.intro=INTRO_TEXT
@@ -1074,10 +1108,12 @@ function render(){
     G.className=S.fx=="hit"?"hit":S.fx=="win"?"win":S.fx=="shift"?"shift":""
     if(S.fx=="ward")G.className="ward"
     if(S.fx=="relic")G.className="relic"
+    if(S.fx=="dark"){G.className="";void G.offsetWidth;G.className="dark"}
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){
       const d=document.createElement("div")
       d.className="t "+cls(x,y)
-      d.textContent=draw(x,y)
+      if(GFX)d.innerHTML=gfxCell(d.className,x,y,draw(x,y))
+      else d.textContent=draw(x,y)
       G.appendChild(d)
     }
     SFX.play(S.fx)

@@ -17,11 +17,13 @@ controls:
 - space or .          wait a turn
 - t                   drop torch
 - m                   mute / unmute
+- g                   graphics / ascii tiles
 - r                   restart
 - c                   continue a saved run (title screen)
 #+end_example
 
-on mobile an on-screen d-pad appears.
+on mobile an on-screen d-pad appears. the side panel lists what
+every item and exit in the current room does.
 
 #+begin_example
 modes (press a number on the title screen):
@@ -31,17 +33,27 @@ modes (press a number on the title screen):
 
 win once and a hidden seventh floor opens.
 
-budget: the game is the two raw files in 1mb/, no build step, and
+budget: the game is the raw files in 1mb/, no build step, and
 together they stay under 1,048,576 bytes (1 MiB). tools/check.sh is
 the gate; it prints the byte ledger and proves every escape room
-stays winnable across hundreds of seeds. ledger history in
+stays winnable across hundreds of seeds, and that every item
+that can appear has a side-panel explanation. ledger history in
 docs/SIZES.txt.
 
 #+begin_src sh
 tools/check.sh
 #+end_src
 
-run it before each commit:
+tools/playthrough.js plays full runs (floors 1-7, camps, finale)
+through the real engine and replays each win through the key handler.
+it takes 1-3 minutes per seed, so it is not part of check.sh:
+
+#+begin_src sh
+node tools/playthrough.js 20
+node tools/playthrough.js --seeds 8q10qn
+#+end_src
+
+run check.sh before each commit:
 
 #+begin_src sh
 ln -s ../../tools/pre-commit .git/hooks/pre-commit
