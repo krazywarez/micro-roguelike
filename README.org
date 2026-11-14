@@ -1,5 +1,7 @@
 #+title: micro-roguelike
 
+support this project through [[https://github.com/sponsors/ccleberg][github sponsors]].
+
 * what
 two small roguelikes at two size limits. explore, grab loot, don't
 die, get out. open either in a browser. nothing to install.
